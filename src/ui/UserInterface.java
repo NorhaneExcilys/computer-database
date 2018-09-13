@@ -15,11 +15,26 @@ import service.DatabaseService;
 
 public class UserInterface {
 	
+	/**
+	 * contains the singleton databaseService
+	 */
 	private DatabaseService _db;
+	/**
+	 * contains the singleton computerService
+	 */
 	private ComputerService _computerService;
+	/**
+	 * contains the singleton companyService
+	 */
 	private CompanyService _companyService;
+	/**
+	 * contains the scanner
+	 */
 	private Scanner _scanner;
 	
+	/**
+	 * builds a UserInterface and initialize the databaseService, computerService, companyService and scanner
+	 */
 	public UserInterface() {
 		_db = DatabaseService.getInstance();
 		_computerService = ComputerService.getInstance(_db);
@@ -27,6 +42,9 @@ public class UserInterface {
 		_scanner = new Scanner(System.in);
 	}
 	
+	/**
+	 * initializes the console interface, give informations to the user and gets his requests
+	 */
 	public void InitInterface() {
 		_db.loadDriver();
 		_db.connectDatabase();
@@ -72,6 +90,9 @@ public class UserInterface {
         while(!str.trim().equals("7"));
 	}
 	
+	/**
+	 * gives instructions to a user 
+	 */
 	public void getInstructions() {
 		System.out.println("1 - Get the list of computers");
 		System.out.println("2 - Get the list of companies");
@@ -82,6 +103,9 @@ public class UserInterface {
 		System.out.println("7 - Close application");
 	}
 	
+	/**
+	 * shows the informations of a computer
+	 */
 	public void showComputers() {
 		List<Computer> computers = _computerService.getComputers();
 		System.out.println("\n--- Here is the list of computers ---");
@@ -89,6 +113,9 @@ public class UserInterface {
 		computers.forEach((v) -> System.out.println(v));
 	}
 	
+	/**
+	 * shows all companies
+	 */
 	public void showCompanies() {
 		List<Company> companies = _companyService.getCompanies();
 		System.out.println("\n--- Here is the list of companies ---");
@@ -96,6 +123,9 @@ public class UserInterface {
 		companies.forEach((v) -> System.out.println(v));
 	}
 	
+	/**
+	 * shows the informations of a chosen computer
+	 */
 	public void showComputerById() {
 		System.out.println("Enter the number of the computer.");
 		
@@ -118,6 +148,9 @@ public class UserInterface {
 		System.out.println(computer.getDetail());
 	}
 	
+	/**
+	 * adds a computer
+	 */
 	public void addComputer() {
 		// Name
 		System.out.println("Please enter the name of the computer you want to add.");
@@ -189,6 +222,9 @@ public class UserInterface {
 		}
 	}
 	
+	/**
+	 * updates a computer
+	 */
 	public void updateComputerInformations() {
 		System.out.println("Please enter the number of the computer you want to update.");
 		
@@ -391,6 +427,9 @@ public class UserInterface {
 	
 	}
 	
+	/**
+	 * deletes a computer
+	 */
 	public void deleteComputer() {
 		System.out.println("Please enter the number of the computer you want to delete.");
 		
@@ -445,10 +484,16 @@ public class UserInterface {
 		}
 	}
 	
+	/**
+	 * close the application
+	 */
 	public static void closeApplication() {
 		System.out.println("See yaa!");
 	}
 	
+	/**
+	 * informs the user that is enter is invalid
+	 */
 	public static void enterInvalid() {
 		System.out.println("Incorrect Enter. Please enter a number between 1 and 7.");
 	}
