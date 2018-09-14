@@ -27,12 +27,12 @@ public class ComputerService {
 	/**
 	 * contains the singleton computerService
 	 */
-	private static ComputerService _computerService;
+	private static ComputerService computerService;
 	
 	/**
 	 * contains the databaseService
 	 */
-	public DatabaseService _databaseService;
+	public DatabaseService databaseService;
 	
 	/**
 	 * builds ComputerService defined by databaseService
@@ -40,7 +40,7 @@ public class ComputerService {
 	 * @param databaseService the databaseService
 	 */
 	private ComputerService(DatabaseService databaseService) {
-		_databaseService = databaseService;
+		this.databaseService = databaseService;
 	}
 	
 	/**
@@ -49,10 +49,10 @@ public class ComputerService {
 	 * @return the actual computerService
 	 */
 	public static ComputerService getInstance(DatabaseService databaseService) {
-		if (_computerService == null) {
+		if (computerService == null) {
 			return new ComputerService(databaseService);
 		}
-		return _computerService;
+		return computerService;
 	}
 	
 	/**
@@ -60,7 +60,7 @@ public class ComputerService {
 	 * @return the list of all computers
 	 */
 	public List<Computer> getComputers() {
-		ResultSet queryResult = _databaseService.executeQuery("SELECT * FROM computer;");
+		ResultSet queryResult = databaseService.executeQuery("SELECT * FROM computer;");
 		List<Computer> computerList = new ArrayList<Computer>();
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		
@@ -100,7 +100,7 @@ public class ComputerService {
 	 */
 	public Computer getComputerById(int id) {
 		Computer currentComputer = null;
-		ResultSet queryResult = _databaseService.executeQuery("SELECT * FROM computer WHERE id = " + id + ";");
+		ResultSet queryResult = databaseService.executeQuery("SELECT * FROM computer WHERE id = " + id + ";");
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		
 		try {
@@ -164,7 +164,7 @@ public class ComputerService {
 			computerDiscontinuedDate = "null";
 		}
 
-		int queryResult = _databaseService.executeUpdate("INSERT INTO computer (name, introduced, discontinued, company_id) VALUE (\'" + name + "\', " + computerIntroducedDate + ", " + computerDiscontinuedDate + ", " + strCompanyId + ");");
+		int queryResult = databaseService.executeUpdate("INSERT INTO computer (name, introduced, discontinued, company_id) VALUE (\'" + name + "\', " + computerIntroducedDate + ", " + computerDiscontinuedDate + ", " + strCompanyId + ");");
 		return queryResult;
 	}
 	
@@ -205,7 +205,7 @@ public class ComputerService {
 		
 		System.out.println("UPDATE computer SET name = '" + computerName + "', introduced = " + sqlIntroducedDate + ", discontinued = " + sqlDiscontinuedDate + ", company_id = " + computerCompanyId + " WHERE id =" + computerId + ";");
 		
-		int queryResult = _databaseService.executeUpdate("UPDATE computer SET name = '" + computerName + "', introduced = " + computerIntroducedDate + ", discontinued = " + computerDiscontinuedDate + ", company_id = " + computerCompanyId + " WHERE id =" + computerId + ";");
+		int queryResult = databaseService.executeUpdate("UPDATE computer SET name = '" + computerName + "', introduced = " + computerIntroducedDate + ", discontinued = " + computerDiscontinuedDate + ", company_id = " + computerCompanyId + " WHERE id =" + computerId + ";");
 		return queryResult;
 	}
 	
@@ -215,7 +215,7 @@ public class ComputerService {
 	 * @return 1 if the computer is deleted and 0 if not
 	 */
 	public int deleteComputerById(int id) {
-		int queryResult = _databaseService.executeUpdate("DELETE FROM computer WHERE id=" + id);
+		int queryResult = databaseService.executeUpdate("DELETE FROM computer WHERE id=" + id);
 		return queryResult;
 	}
 	
@@ -225,7 +225,7 @@ public class ComputerService {
 	 * @return true if the identifier of the computer is correct and false if not
 	 */
 	public boolean isCorrectId(int id) {
-		ResultSet quertyResult = _databaseService.executeQuery("SELECT * FROM computer WHERE id = " + id + ";");
+		ResultSet quertyResult = databaseService.executeQuery("SELECT * FROM computer WHERE id = " + id + ";");
 		try {
 			if (!quertyResult.next()) {
 				return false;

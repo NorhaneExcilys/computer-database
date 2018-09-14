@@ -16,19 +16,19 @@ public class Company {
 	/**
 	 * contains the id of this company 
 	 */
-	private int _id;
+	private int id;
 	/**
 	 * contains the name of this company 
 	 */
-	private String _name;
+	private String name;
 	
 	/** builds Company defined by its id and name
 	 * @param id the id of the company
 	 * @param name the name of the company
 	 */
 	public Company(int id, String name) {
-		_id = id;
-		_name = name;
+		this.id = id;
+		this.name = name;
 	}
 	
 	/**
@@ -36,7 +36,7 @@ public class Company {
      * @return The id of this company.
      */
 	public int getId() {
-		return _id;
+		return id;
 	}
 	
 	/**
@@ -44,7 +44,7 @@ public class Company {
      * @return The name of this company.
      */
 	public String getName() {
-		return _name;
+		return name;
 	}
 	
 	/**
@@ -52,7 +52,7 @@ public class Company {
 	 * @param name the new name
 	 */
 	public void setName(String name) {
-		_name = name;
+		this.name = name;
 	}
 
     /**
@@ -60,7 +60,7 @@ public class Company {
      * @return A string representation of the company.
      */
 	public String toString() {
-		return _id + " " + _name;
+		return id + " " + name;
 	}
 	
 }

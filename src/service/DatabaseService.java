@@ -21,7 +21,7 @@ public class DatabaseService {
 	/**
 	 * contains the singleton databaseService
 	 */
-	private static DatabaseService _databaseService;
+	private static DatabaseService databaseService;
 	
 	/**
 	 * contains the connection of this databaseService 
@@ -40,10 +40,10 @@ public class DatabaseService {
 	 * @return the actual databaseService
 	 */
 	public static DatabaseService getInstance() {
-		if (_databaseService == null) {
+		if (databaseService == null) {
 			return new DatabaseService();
 		}
-		return _databaseService;
+		return databaseService;
 	}
 	
 	/**

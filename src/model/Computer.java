@@ -21,23 +21,23 @@ public class Computer {
 	/**
 	 * contains the id of this computer 
 	 */
-	private int _id;
+	private int id;
 	/**
 	 * contains the name of this computer 
 	 */
-	private String _name;
+	private String name;
 	/**
 	 * contains the introduced date of this computer 
 	 */
-	private Date _introducedDate;
+	private Date introducedDate;
 	/**
 	 * contains the discontinued date of this computer 
 	 */
-	private Date _discontinuedDate;
+	private Date discontinuedDate;
 	/**
 	 * contains the company identifier of this computer 
 	 */
-	private int _companyId;
+	private int companyId;
 	
 	/**
 	 * builds Computer defined by its name, introducedDate, discontinuedDate, companyId
@@ -47,10 +47,10 @@ public class Computer {
 	 * @param companyId the company identifier of this computer
 	 */
 	public Computer(String name, Date introducedDate, Date discontinuedDate, int companyId) {
-		_name = name;
-		_introducedDate = introducedDate;
-		_discontinuedDate = discontinuedDate;
-		_companyId = companyId;
+		this.name = name;
+		this.introducedDate = introducedDate;
+		this.discontinuedDate = discontinuedDate;
+		this.companyId = companyId;
 	}
 	
 	/**
@@ -62,11 +62,11 @@ public class Computer {
 	 * @param companyId the company identifier of this computer
 	 */
 	public Computer(int id, String name, Date introducedDate, Date discontinuedDate, int companyId) {
-		_id = id;
-		_name = name;
-		_introducedDate = introducedDate;
-		_discontinuedDate = discontinuedDate;
-		_companyId = companyId;
+		this.id = id;
+		this.name = name;
+		this.introducedDate = introducedDate;
+		this.discontinuedDate = discontinuedDate;
+		this.companyId = companyId;
 	}
 	
 	/**
@@ -74,7 +74,7 @@ public class Computer {
      * @return The id of this computer.
      */
 	public int getId() {
-		return _id;
+		return id;
 	}
 
 	/**
@@ -82,7 +82,7 @@ public class Computer {
      * @return The name of this computer.
      */
 	public String getName() {
-		return _name;
+		return name;
 	}
 	
 	/**
@@ -90,7 +90,7 @@ public class Computer {
 	 * @param name the new name
 	 */
 	public void setName(String name) {
-		_name = name;
+		this.name = name;
 	}
 	
 	/**
@@ -98,7 +98,7 @@ public class Computer {
 	 * @return The introduced date of this computer.
 	 */
 	public Date getIntroducedDate() {
-		return _introducedDate;
+		return introducedDate;
 	}
 	
 	/**
@@ -106,7 +106,7 @@ public class Computer {
 	 * @param introducedDate the new introduced date
 	 */
 	public void setIntroducedDate(Date introducedDate) {
-		_introducedDate = introducedDate;
+		this.introducedDate = introducedDate;
 	}
 	
 	/**
@@ -114,7 +114,7 @@ public class Computer {
 	 * @return The discontinued date of this computer.
 	 */
 	public Date getDiscontinuedDate() {
-		return _discontinuedDate;
+		return discontinuedDate;
 	}
 	
 	/**
@@ -122,7 +122,7 @@ public class Computer {
 	 * @param discontinuedDate the new discontinued date
 	 */
 	public void setDiscontinuedDate(Date discontinuedDate) {
-		_discontinuedDate = discontinuedDate;
+		this.discontinuedDate = discontinuedDate;
 	}
 	
 	/**
@@ -130,7 +130,7 @@ public class Computer {
 	 * @return the company identifier of this computer.
 	 */
 	public int getCompanyId() {
-		return _companyId;
+		return companyId;
 	}
 	
 	/**
@@ -138,7 +138,7 @@ public class Computer {
 	 * @param companyId the new company identifier
 	 */
 	public void setCompanyId(int companyId) {
-		_companyId = companyId;
+		this.companyId = companyId;
 	}
 	
     /**
@@ -146,7 +146,7 @@ public class Computer {
      * @return A string representation of the computer.
      */
 	public String toString() {
-		return _id + " " + _name + " " + _introducedDate + " " + _discontinuedDate + " " + _companyId;
+		return id + " " + name + " " + introducedDate + " " + discontinuedDate + " " + companyId;
 	}
 	
     /**
@@ -154,7 +154,7 @@ public class Computer {
      * @return A string representation of the computer.
      */
 	public String getDetail() {
-		return "Number: " +_id + " Name: " + _name + " Introduced date: " + _introducedDate + " DiscontinuedDate: " + _discontinuedDate + " Company Number: " + _companyId;
+		return "Number: " + id + " Name: " + name + " Introduced date: " + introducedDate + " DiscontinuedDate: " + discontinuedDate + " Company Number: " + companyId;
 	}
 
 }

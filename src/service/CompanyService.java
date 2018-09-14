@@ -24,19 +24,19 @@ public class CompanyService {
 	/**
 	 * contains the singleton companyService
 	 */
-	private static CompanyService _companyService;
+	private static CompanyService companyService;
 	
 	/**
 	 * contains the databaseService
 	 */
-	public DatabaseService _databaseService;
+	public DatabaseService databaseService;
 	
 	/**
 	 * builds CompanyService defined by databaseService
 	 * @param databaseService the databaseService
 	 */
 	private CompanyService(DatabaseService databaseService) {
-		_databaseService = databaseService;
+		this.databaseService = databaseService;
 	}
 
 	/**
@@ -45,10 +45,10 @@ public class CompanyService {
 	 * @return the actual companyService
 	 */
 	public static CompanyService getInstance(DatabaseService databaseService) {
-		if (_companyService == null) {
+		if (companyService == null) {
 			return new CompanyService(databaseService);
 		}
-		return _companyService;
+		return companyService;
 	}
 	
 	/**
@@ -56,7 +56,7 @@ public class CompanyService {
 	 * @return the list of all companies
 	 */
 	public List<Company> getCompanies() {
-		ResultSet quertyResult = _databaseService.executeQuery("SELECT * FROM company;");
+		ResultSet quertyResult = databaseService.executeQuery("SELECT * FROM company;");
 		List<Company> companyList = new ArrayList<Company>();
 		
 		try {
@@ -79,7 +79,7 @@ public class CompanyService {
 	 * @return true if the identifier of the company is correct and false if not
 	 */
 	public boolean isCorrectId(int id) {
-		ResultSet quertyResult = _databaseService.executeQuery("SELECT * FROM company WHERE id = " + id + ";");
+		ResultSet quertyResult = databaseService.executeQuery("SELECT * FROM company WHERE id = " + id + ";");
 		try {
 			if (!quertyResult.next()) {
 				return false;
