@@ -78,7 +78,7 @@ public class CompanyService {
 	 * @param id the identifier of the company
 	 * @return true if the identifier of the company is correct and false if not
 	 */
-	public boolean isCorrectId(int id) {
+	public boolean isCorrectId(long id) {
 		ResultSet quertyResult = databaseService.executeQuery("SELECT * FROM company WHERE id = " + id + ";");
 		try {
 			if (!quertyResult.next()) {

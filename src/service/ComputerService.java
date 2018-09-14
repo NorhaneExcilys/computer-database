@@ -98,7 +98,7 @@ public class ComputerService {
 	 * @param id the identifier of the computer
 	 * @return the computer chosen by identifier
 	 */
-	public Computer getComputerById(int id) {
+	public Computer getComputerById(long id) {
 		Computer currentComputer = null;
 		ResultSet queryResult = databaseService.executeQuery("SELECT * FROM computer WHERE id = " + id + ";");
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -137,8 +137,8 @@ public class ComputerService {
 	 */
 	public int addComputer(Computer computer) {
 		String name = computer.getName();
-		int companyId = computer.getCompanyId();
-		String strCompanyId = companyId == -1 ? null : Integer.toString(companyId);
+		long companyId = computer.getCompanyId();
+		String strCompanyId = companyId == -1 ? null : Long.toString(companyId);
 		
 		// Introduced Date
 		Date introducedDate = computer.getIntroducedDate();
@@ -174,7 +174,7 @@ public class ComputerService {
 	 * @return 1 if the computer is updated and 0 if not
 	 */
 	public int updateComputerById(Computer computer) {
-		int computerId = computer.getId();
+		long computerId = computer.getId();
 		String computerName = computer.getName();
 		
 		// Introduced Date
@@ -201,7 +201,7 @@ public class ComputerService {
 			computerDiscontinuedDate = "null";
 		}
 		
-		int computerCompanyId = computer.getCompanyId();
+		long computerCompanyId = computer.getCompanyId();
 		
 		System.out.println("UPDATE computer SET name = '" + computerName + "', introduced = " + sqlIntroducedDate + ", discontinued = " + sqlDiscontinuedDate + ", company_id = " + computerCompanyId + " WHERE id =" + computerId + ";");
 		
@@ -224,7 +224,7 @@ public class ComputerService {
 	 * @param id the identifier of the computer
 	 * @return true if the identifier of the computer is correct and false if not
 	 */
-	public boolean isCorrectId(int id) {
+	public boolean isCorrectId(long id) {
 		ResultSet quertyResult = databaseService.executeQuery("SELECT * FROM computer WHERE id = " + id + ";");
 		try {
 			if (!quertyResult.next()) {

@@ -229,11 +229,11 @@ public class UserInterface {
 		System.out.println("Please enter the number of the computer you want to update.");
 		
 		// On selectionne l'ordinateur en question
-		int computerId = -1;
+		long computerId = -1;
 		do {
 			String str = scanner.nextLine();
 			try {
-				computerId = Integer.parseInt(str);
+				computerId = Long.parseLong(str);
 				if (computerId < 0) {
 					System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the computer you want to update.");
 				}
@@ -251,11 +251,11 @@ public class UserInterface {
 		} while (computerId < 0);
 		
 		Computer computer = computerService.getComputerById(computerId);
-		int currentId = computer.getId();
+		long currentId = computer.getId();
 		String currentName = computer.getName();
 		Date currentIntroducedDate = computer.getIntroducedDate();
 		Date currentDiscontinuedDate = computer.getDiscontinuedDate();
-		int currentCompanyId = computer.getCompanyId();
+		long currentCompanyId = computer.getCompanyId();
 		
 		// Computer name
 		System.out.println("The name of the computer is " + computer.getName());

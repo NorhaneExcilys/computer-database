@@ -16,7 +16,7 @@ public class Company {
 	/**
 	 * contains the id of this company 
 	 */
-	private int id;
+	private long id;
 	/**
 	 * contains the name of this company 
 	 */
@@ -26,7 +26,7 @@ public class Company {
 	 * @param id the id of the company
 	 * @param name the name of the company
 	 */
-	public Company(int id, String name) {
+	public Company(long id, String name) {
 		this.id = id;
 		this.name = name;
 	}
@@ -35,7 +35,7 @@ public class Company {
      * Return the id of this company.
      * @return The id of this company.
      */
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 	

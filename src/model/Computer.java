@@ -21,7 +21,7 @@ public class Computer {
 	/**
 	 * contains the id of this computer 
 	 */
-	private int id;
+	private long id;
 	/**
 	 * contains the name of this computer 
 	 */
@@ -37,7 +37,7 @@ public class Computer {
 	/**
 	 * contains the company identifier of this computer 
 	 */
-	private int companyId;
+	private long companyId;
 	
 	/**
 	 * builds Computer defined by its name, introducedDate, discontinuedDate, companyId
@@ -46,7 +46,7 @@ public class Computer {
 	 * @param discontinuedDate the discontinued date of the computer
 	 * @param companyId the company identifier of this computer
 	 */
-	public Computer(String name, Date introducedDate, Date discontinuedDate, int companyId) {
+	public Computer(String name, Date introducedDate, Date discontinuedDate, long companyId) {
 		this.name = name;
 		this.introducedDate = introducedDate;
 		this.discontinuedDate = discontinuedDate;
@@ -61,7 +61,7 @@ public class Computer {
 	 * @param discontinuedDate the discontinued date of the computer
 	 * @param companyId the company identifier of this computer
 	 */
-	public Computer(int id, String name, Date introducedDate, Date discontinuedDate, int companyId) {
+	public Computer(long id, String name, Date introducedDate, Date discontinuedDate, long companyId) {
 		this.id = id;
 		this.name = name;
 		this.introducedDate = introducedDate;
@@ -73,7 +73,7 @@ public class Computer {
      * Return the id of this computer.
      * @return The id of this computer.
      */
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 
@@ -129,7 +129,7 @@ public class Computer {
 	 * Return the company identifier of this computer.
 	 * @return the company identifier of this computer.
 	 */
-	public int getCompanyId() {
+	public long getCompanyId() {
 		return companyId;
 	}
 	
@@ -137,7 +137,7 @@ public class Computer {
 	 * change the actual company identifier of this computer
 	 * @param companyId the new company identifier
 	 */
-	public void setCompanyId(int companyId) {
+	public void setCompanyId(long companyId) {
 		this.companyId = companyId;
 	}
 	
