@@ -46,6 +46,11 @@ public class DatabaseService {
 		return databaseService;
 	}
 	
+	
+	public Connection getConnection() {
+		return this.connection;
+	}
+	
 	/**
 	 * Load of the driver JDBC for MySQL
 	 */
@@ -116,6 +121,8 @@ public class DatabaseService {
 		}
 		return queryResult;
 	}
+	
+
 	
 	/**
 	 * Close the actual connection

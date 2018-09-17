@@ -55,12 +55,9 @@ public class Company {
 		this.name = name;
 	}
 
-    /**
-     * return a string representation of the company.
-     * @return A string representation of the company.
-     */
+	@Override
 	public String toString() {
-		return id + " " + name;
+		return "Company [id=" + id + ", name=" + name + "]";
 	}
 	
 }

@@ -1,5 +1,6 @@
 package service;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -27,7 +28,15 @@ import model.Computer;
 
 
 public class ComputerService {
-
+	
+	private final static String GET_ALL = "SELECT id, name, introduced, discontinued, company_id  FROM computer;";
+	private final static String GET_BY_ID = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE id = ?;";
+	private final static String ADD = "INSERT INTO computer (name, introduced, discontinued, company_id) VALUE (?, ?, ?, ?);";
+	private final static String UPDATE = "UPDATE computer SET name = ?, introduced = ?, discontinued = ?, company_id = ? WHERE id = ?;";
+	private final static String DELETE = "DELETE FROM computer WHERE id = ?";
+	
+	
+	
 	/**
 	 * contains the singleton computerService
 	 */
@@ -70,7 +79,7 @@ public class ComputerService {
 	 * @return the list of all computers
 	 */
 	public List<Computer> getComputers() {
-		ResultSet queryResult = databaseService.executeQuery("SELECT id, name, introduced, discontinued, company_id  FROM computer;");
+		ResultSet queryResult = databaseService.executeQuery(GET_ALL);
 		List<Computer> computerList = new ArrayList<Computer>();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
 		
@@ -116,10 +125,12 @@ public class ComputerService {
 	 */
 	public Computer getComputerById(long id) {
 		Computer currentComputer = null;
-		ResultSet queryResult = databaseService.executeQuery("SELECT id, name, introduced, discontinued, company_id FROM computer WHERE id = " + id + ";");
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-		
 		try {
+			PreparedStatement preparedStatement = databaseService.getConnection().prepareStatement(GET_BY_ID);
+			preparedStatement.setLong(1, id);
+			
+			ResultSet queryResult = preparedStatement.executeQuery();
 			if(queryResult.next()) {
 				int currentId = queryResult.getInt("id");
 				String currentName = queryResult.getString("name");
@@ -160,33 +171,38 @@ public class ComputerService {
 	public int addComputer(Computer computer) {
 		String name = computer.getName();
 		Company company = computer.getCompany();
-		String strCompanyId = company.getId() == -1 ? null : Long.toString(company.getId());
 		
 		// Introduced Date
 		LocalDate introducedDate = computer.getIntroducedDate();
 		java.sql.Date sqlIntroducedDate = null;
-		String computerIntroducedDate = null;
 		if (introducedDate != null) {
 			sqlIntroducedDate = java.sql.Date.valueOf(introducedDate);
-			computerIntroducedDate = "'" + sqlIntroducedDate + "'";
-		}
-		else {
-			computerIntroducedDate = "null";
 		}
 		
 		// Discontinued Date
 		LocalDate discontinuedDate = computer.getDiscontinuedDate();
 		java.sql.Date sqlDiscontinuedDate = null;
-		String computerDiscontinuedDate = null;
 		if (discontinuedDate != null) {
 			sqlDiscontinuedDate = java.sql.Date.valueOf(discontinuedDate);
-			computerDiscontinuedDate = "'" + sqlDiscontinuedDate + "'";
 		}
-		else {
-			computerDiscontinuedDate = "null";
+		
+		int queryResult = -1;
+		try {
+			PreparedStatement preparedStatement = databaseService.getConnection().prepareStatement(ADD);
+			preparedStatement.setString(1, name);
+			preparedStatement.setDate(2, sqlIntroducedDate);
+			preparedStatement.setDate(3, sqlDiscontinuedDate);
+			if (company == null) {
+				preparedStatement.setNull(4, java.sql.Types.NUMERIC);
+			}
+			else {
+				preparedStatement.setLong(4, company == null ? null : company.getId());
+			}
+			
+			queryResult = preparedStatement.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-
-		int queryResult = databaseService.executeUpdate("INSERT INTO computer (name, introduced, discontinued, company_id) VALUE (\'" + name + "\', " + computerIntroducedDate + ", " + computerDiscontinuedDate + ", " + strCompanyId + ");");
 		return queryResult;
 	}
 	
@@ -197,35 +213,42 @@ public class ComputerService {
 	 */
 	public int updateComputerById(Computer computer) {
 		long computerId = computer.getId();
+		Company company = computer.getCompany();
 		String computerName = computer.getName();
+		int queryResult = -1;
 		
 		// Introduced Date
 		LocalDate introducedDate = computer.getIntroducedDate();
 		java.sql.Date sqlIntroducedDate = null;
-		String computerIntroducedDate = null;
 		if (introducedDate != null) {
 			sqlIntroducedDate = java.sql.Date.valueOf(introducedDate);
-			computerIntroducedDate = "'" + sqlIntroducedDate + "'";
-		}
-		else {
-			computerIntroducedDate = "null";
 		}
 		
 		// Discontinued Date
 		LocalDate discontinuedDate = computer.getDiscontinuedDate();
 		java.sql.Date sqlDiscontinuedDate = null;
-		String computerDiscontinuedDate = null;
 		if (discontinuedDate != null) {
 			sqlDiscontinuedDate = java.sql.Date.valueOf(discontinuedDate);
-			computerDiscontinuedDate = "'" + sqlDiscontinuedDate + "'";
-		}
-		else {
-			computerDiscontinuedDate = "null";
 		}
 		
-		long computerCompanyId = computer.getCompany().getId();
+		try {
+			PreparedStatement preparedStatement = databaseService.getConnection().prepareStatement(UPDATE);
+			preparedStatement.setString(1, computerName);
+			preparedStatement.setDate(2, sqlIntroducedDate);
+			preparedStatement.setDate(3, sqlDiscontinuedDate);
+			if (company == null) {
+				preparedStatement.setNull(4, java.sql.Types.NUMERIC);
+			}
+			else {
+				preparedStatement.setLong(4, company == null ? null : company.getId());
+			}
+			preparedStatement.setLong(5, computerId);
+			queryResult = preparedStatement.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		
-		int queryResult = databaseService.executeUpdate("UPDATE computer SET name = '" + computerName + "', introduced = " + computerIntroducedDate + ", discontinued = " + computerDiscontinuedDate + ", company_id = " + computerCompanyId + " WHERE id =" + computerId + ";");
+		
 		return queryResult;
 	}
 	
@@ -235,7 +258,14 @@ public class ComputerService {
 	 * @return 1 if the computer is deleted and 0 if not
 	 */
 	public int deleteComputerById(int id) {
-		int queryResult = databaseService.executeUpdate("DELETE FROM computer WHERE id=" + id);
+		int queryResult = -1;
+		try {
+			PreparedStatement preparedStatement = databaseService.getConnection().prepareStatement(DELETE);
+			preparedStatement.setLong(1, id);
+			queryResult = preparedStatement.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return queryResult;
 	}
 	
@@ -245,9 +275,18 @@ public class ComputerService {
 	 * @return true if the identifier of the computer is correct and false if not
 	 */
 	public boolean isCorrectId(long id) {
-		ResultSet quertyResult = databaseService.executeQuery("SELECT id, name, introduced, discontinued, company_id FROM computer WHERE id = " + id + ";");
+		
+		ResultSet queryResult = null;
 		try {
-			if (!quertyResult.next()) {
+			PreparedStatement preparedStatement = databaseService.getConnection().prepareStatement(GET_BY_ID);
+			preparedStatement.setLong(1, id);
+			queryResult = preparedStatement.executeQuery();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		
+		try {
+			if (!queryResult.next()) {
 				return false;
 			}
 		} catch (SQLException e) {

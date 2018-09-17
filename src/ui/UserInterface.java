@@ -144,7 +144,7 @@ public class UserInterface {
 		
 		Computer computer = computerService.getComputerById(computerId);
 		System.out.println("\n--- Here is the information of the computer number " + computerId + " ---");
-		System.out.println(computer.getDetail());
+		System.out.println(computer);
 	}
 	
 	/**
@@ -212,7 +212,10 @@ public class UserInterface {
 			}
 		} while (!strCompanyId.equals("null") && companyId < 0);
 		
+		
 		Computer c = new Computer(computerName, introducedDate, discontinuedDate, companyService.getCompanyById(companyId));
+		
+		System.out.println();
 		int success = computerService.addComputer(c);
 		if (success == 1) {
 			System.out.println("Your computer is now added");

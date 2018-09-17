@@ -141,20 +141,10 @@ public class Computer {
 		this.company = company;
 	}
 	
-    /**
-     * return a string representation of the computer.
-     * @return A string representation of the computer.
-     */
+    @Override
 	public String toString() {
-		return id + " " + name + " " + introducedDate + " " + discontinuedDate + " " + company;
-	}
-	
-    /**
-     * return a detailed string representation of the computer.
-     * @return A string representation of the computer.
-     */
-	public String getDetail() {
-		return "Number: " + id + " Name: " + name + " Introduced date: " + introducedDate + " DiscontinuedDate: " + discontinuedDate + " Company: " + company;
+		return "Computer [id=" + id + ", name=" + name + ", introducedDate=" + introducedDate + ", discontinuedDate="
+				+ discontinuedDate + ", company=" + company + "]";
 	}
 
 }

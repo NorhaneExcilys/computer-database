@@ -1,5 +1,6 @@
 package service;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -24,6 +25,10 @@ import model.Computer;
 
 
 public class CompanyService {
+	
+	private final static String GET_ALL = "SELECT id, name FROM company;";
+	private final static String GET_BY_ID = "SELECT id, name FROM company WHERE id = ?;";
+	
 	
 	/**
 	 * contains the singleton companyService
@@ -60,7 +65,7 @@ public class CompanyService {
 	 * @return the list of all companies
 	 */
 	public List<Company> getCompanies() {
-		ResultSet quertyResult = databaseService.executeQuery("SELECT id, name FROM company;");
+		ResultSet quertyResult = databaseService.executeQuery(GET_ALL);
 		List<Company> companyList = new ArrayList<Company>();
 		
 		try {
@@ -84,16 +89,17 @@ public class CompanyService {
 	 */
 	public Company getCompanyById(long id) {
 		Company currentCompany = null;
-		ResultSet queryResult = databaseService.executeQuery("SELECT id, name FROM company WHERE id = " + id + ";");
-		
 		try {
+			PreparedStatement preparedStatement = databaseService.getConnection().prepareStatement(GET_BY_ID);
+			preparedStatement.setLong(1, id); 
+			ResultSet queryResult = preparedStatement.executeQuery();
 			if(queryResult.next()) {
 				int currentId = queryResult.getInt("id");
 				String currentName = queryResult.getString("name");
 				currentCompany = new Company(currentId, currentName);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		return currentCompany;
 	}
@@ -104,15 +110,18 @@ public class CompanyService {
 	 * @return true if the identifier of the company is correct and false if not
 	 */
 	public boolean isCorrectId(long id) {
-		ResultSet quertyResult = databaseService.executeQuery("SELECT id, name FROM company WHERE id = " + id + ";");
+		PreparedStatement preparedStatement;
 		try {
-			if (!quertyResult.next()) {
+			preparedStatement = databaseService.getConnection().prepareStatement(GET_BY_ID);
+			preparedStatement.setLong(1, id); 
+			ResultSet queryResult = preparedStatement.executeQuery();
+			if (!queryResult.next()) {
 				return false;
 			}
 		} catch (SQLException e) {
-
+			e.printStackTrace();
 		}
 		return true;
 	}
-
+	
 }
