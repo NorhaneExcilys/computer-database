@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import model.Company;
 import model.Computer;
 
 /**
@@ -33,6 +34,11 @@ public class ComputerService {
 	private static ComputerService computerService;
 	
 	/**
+	 * contains the companyService
+	 */
+	public CompanyService companyService;
+	
+	/**
 	 * contains the databaseService
 	 */
 	public DatabaseService databaseService;
@@ -42,8 +48,9 @@ public class ComputerService {
 	 * @param databaseService the databaseService
 	 * @param databaseService the databaseService
 	 */
-	private ComputerService(DatabaseService databaseService) {
+	private ComputerService(DatabaseService databaseService, CompanyService companyService) {
 		this.databaseService = databaseService;
+		this.companyService = companyService;
 	}
 	
 	/**
@@ -51,9 +58,9 @@ public class ComputerService {
 	 * @param databaseService the databaseService
 	 * @return the actual computerService
 	 */
-	public static ComputerService getInstance(DatabaseService databaseService) {
+	public static ComputerService getInstance(DatabaseService databaseService, CompanyService companyService) {
 		if (computerService == null) {
-			return new ComputerService(databaseService);
+			return new ComputerService(databaseService, companyService);
 		}
 		return computerService;
 	}
@@ -91,8 +98,8 @@ public class ComputerService {
 						ex.printStackTrace();
 					}
 				}
-				int currentCompanyId = queryResult.getInt("company_id");
-				Computer currentComputer = new Computer(currentId, currentName, introducedDate, discontinuedDate, currentCompanyId);
+				long currentCompanyId = queryResult.getLong("company_id");
+				Computer currentComputer = new Computer(currentId, currentName, introducedDate, discontinuedDate, companyService.getCompanyById(currentCompanyId));
 				computerList.add(currentComputer);
 			}
 		} catch (SQLException e) {
@@ -137,7 +144,7 @@ public class ComputerService {
 					}
 				}
 				int currentCompanyId = queryResult.getInt("company_id");
-				currentComputer = new Computer(currentId, currentName, introducedDate, discontinuedDate, currentCompanyId);
+				currentComputer = new Computer(currentId, currentName, introducedDate, discontinuedDate, companyService.getCompanyById(currentCompanyId));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -152,8 +159,8 @@ public class ComputerService {
 	 */
 	public int addComputer(Computer computer) {
 		String name = computer.getName();
-		long companyId = computer.getCompanyId();
-		String strCompanyId = companyId == -1 ? null : Long.toString(companyId);
+		Company company = computer.getCompany();
+		String strCompanyId = company.getId() == -1 ? null : Long.toString(company.getId());
 		
 		// Introduced Date
 		LocalDate introducedDate = computer.getIntroducedDate();
@@ -216,7 +223,7 @@ public class ComputerService {
 			computerDiscontinuedDate = "null";
 		}
 		
-		long computerCompanyId = computer.getCompanyId();
+		long computerCompanyId = computer.getCompany().getId();
 		
 		int queryResult = databaseService.executeUpdate("UPDATE computer SET name = '" + computerName + "', introduced = " + computerIntroducedDate + ", discontinued = " + computerDiscontinuedDate + ", company_id = " + computerCompanyId + " WHERE id =" + computerId + ";");
 		return queryResult;

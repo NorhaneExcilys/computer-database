@@ -37,7 +37,7 @@ public class Computer {
 	/**
 	 * contains the company identifier of this computer 
 	 */
-	private long companyId;
+	private Company company;
 	
 	/**
 	 * builds Computer defined by its name, introducedDate, discontinuedDate, companyId
@@ -46,11 +46,11 @@ public class Computer {
 	 * @param discontinuedDate the discontinued date of the computer
 	 * @param companyId the company identifier of this computer
 	 */
-	public Computer(String name, LocalDate introducedDate, LocalDate discontinuedDate, long companyId) {
+	public Computer(String name, LocalDate introducedDate, LocalDate discontinuedDate, Company company) {
 		this.name = name;
 		this.introducedDate = introducedDate;
 		this.discontinuedDate = discontinuedDate;
-		this.companyId = companyId;
+		this.company = company;
 	}
 	
 	/**
@@ -61,12 +61,12 @@ public class Computer {
 	 * @param discontinuedDate the discontinued date of the computer
 	 * @param companyId the company identifier of this computer
 	 */
-	public Computer(long id, String name, LocalDate introducedDate, LocalDate discontinuedDate, long companyId) {
+	public Computer(long id, String name, LocalDate introducedDate, LocalDate discontinuedDate, Company company) {
 		this.id = id;
 		this.name = name;
 		this.introducedDate = introducedDate;
 		this.discontinuedDate = discontinuedDate;
-		this.companyId = companyId;
+		this.company = company;
 	}
 	
 	/**
@@ -129,16 +129,16 @@ public class Computer {
 	 * Return the company identifier of this computer.
 	 * @return the company identifier of this computer.
 	 */
-	public long getCompanyId() {
-		return companyId;
+	public Company getCompany() {
+		return company;
 	}
 	
 	/**
 	 * change the actual company identifier of this computer
 	 * @param companyId the new company identifier
 	 */
-	public void setCompanyId(long companyId) {
-		this.companyId = companyId;
+	public void setCompany(Company company) {
+		this.company = company;
 	}
 	
     /**
@@ -146,7 +146,7 @@ public class Computer {
      * @return A string representation of the computer.
      */
 	public String toString() {
-		return id + " " + name + " " + introducedDate + " " + discontinuedDate + " " + companyId;
+		return id + " " + name + " " + introducedDate + " " + discontinuedDate + " " + company;
 	}
 	
     /**
@@ -154,7 +154,7 @@ public class Computer {
      * @return A string representation of the computer.
      */
 	public String getDetail() {
-		return "Number: " + id + " Name: " + name + " Introduced date: " + introducedDate + " DiscontinuedDate: " + discontinuedDate + " Company Number: " + companyId;
+		return "Number: " + id + " Name: " + name + " Introduced date: " + introducedDate + " DiscontinuedDate: " + discontinuedDate + " Company: " + company;
 	}
 
 }

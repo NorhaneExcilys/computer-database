@@ -1,12 +1,8 @@
 package ui;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
@@ -40,8 +36,8 @@ public class UserInterface {
 	 */
 	public UserInterface() {
 		db = DatabaseService.getInstance();
-		computerService = ComputerService.getInstance(db);
 		companyService = CompanyService.getInstance(db);
+		computerService = ComputerService.getInstance(db, companyService);
 		scanner = new Scanner(System.in);
 	}
 	
@@ -216,7 +212,7 @@ public class UserInterface {
 			}
 		} while (!strCompanyId.equals("null") && companyId < 0);
 		
-		Computer c = new Computer(computerName, introducedDate, discontinuedDate, companyId);
+		Computer c = new Computer(computerName, introducedDate, discontinuedDate, companyService.getCompanyById(companyId));
 		int success = computerService.addComputer(c);
 		if (success == 1) {
 			System.out.println("Your computer is now added");
@@ -259,7 +255,7 @@ public class UserInterface {
 		String currentName = computer.getName();
 		LocalDate currentIntroducedDate = computer.getIntroducedDate();
 		LocalDate currentDiscontinuedDate = computer.getDiscontinuedDate();
-		long currentCompanyId = computer.getCompanyId();
+		long currentCompanyId = computer.getCompany().getId();
 		
 		// Computer name
 		System.out.println("The name of the computer is " + computer.getName());
@@ -373,7 +369,7 @@ public class UserInterface {
         }
         
         // Company id
-        System.out.println("The company id of your computer is " + computer.getCompanyId());
+        System.out.println("The company id of your computer is " + computer.getCompany().getId());
 		System.out.println("Do you want to change this number? Enter yes or no.");
 		int changeCompanyId = -1;
 		do {
@@ -416,7 +412,7 @@ public class UserInterface {
 			currentCompanyId = companyId;
 		}
 		
-		Computer updatedComputer = new Computer(currentId, currentName, currentIntroducedDate, currentDiscontinuedDate, currentCompanyId);
+		Computer updatedComputer = new Computer(currentId, currentName, currentIntroducedDate, currentDiscontinuedDate, companyService.getCompanyById(currentCompanyId));
 		
 		
 		int success = computerService.updateComputerById(updatedComputer);

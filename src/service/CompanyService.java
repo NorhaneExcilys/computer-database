@@ -2,10 +2,14 @@ package service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 import model.Company;
+import model.Computer;
 
 /**
  * <b>CompanyService is the class that enables to performs action on the database computer.</b>
@@ -71,6 +75,27 @@ public class CompanyService {
 		}
 		
 		return companyList;
+	}
+	
+	/**
+	 * return the company chosen by identifier
+	 * @param id the identifier of the company
+	 * @return the company chosen by identifier
+	 */
+	public Company getCompanyById(long id) {
+		Company currentCompany = null;
+		ResultSet queryResult = databaseService.executeQuery("SELECT id, name FROM company WHERE id = " + id + ";");
+		
+		try {
+			if(queryResult.next()) {
+				int currentId = queryResult.getInt("id");
+				String currentName = queryResult.getString("name");
+				currentCompany = new Company(currentId, currentName);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return currentCompany;
 	}
 	
 	/**
