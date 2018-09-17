@@ -1,5 +1,6 @@
 package persistance;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -59,20 +60,28 @@ public class CompanyDAO {
 	 * @return the list of all companies
 	 */
 	public List<Company> getCompanies() {
-		ResultSet quertyResult = dao.executeQuery(GET_ALL);
-		List<Company> companyList = new ArrayList<Company>();
-		
+		Connection connection = null;
+		ResultSet queryResult = null;
 		try {
-			while (quertyResult.next()) {
-				int currentId = quertyResult.getInt("id");
-				String currentName = quertyResult.getString("name");
-			    Company currentCompany = new Company(currentId, currentName);
-			    companyList.add(currentCompany);
+			connection = dao.getConnection();
+			queryResult = connection.createStatement().executeQuery(GET_ALL);
+
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		List<Company> companyList = new ArrayList<Company>();
+		try {
+			while (queryResult.next()) {
+				long currentId = queryResult.getLong("id");
+				String currentName = queryResult.getString("name");
+
+				Company currentCompany = new Company(currentId, currentName);
+				companyList.add(currentCompany);
 			}
+			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
 		return companyList;
 	}
 	
@@ -84,7 +93,9 @@ public class CompanyDAO {
 	public Company getCompanyById(long id) {
 		Company currentCompany = null;
 		try {
-			PreparedStatement preparedStatement = dao.getConnection().prepareStatement(GET_BY_ID);
+			Connection connection = dao.getConnection();
+			PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
+
 			preparedStatement.setLong(1, id); 
 			ResultSet queryResult = preparedStatement.executeQuery();
 			if(queryResult.next()) {
@@ -92,8 +103,9 @@ public class CompanyDAO {
 				String currentName = queryResult.getString("name");
 				currentCompany = new Company(currentId, currentName);
 			}
+			connection.close();
 		} catch (SQLException e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 		return currentCompany;
 	}
@@ -106,12 +118,15 @@ public class CompanyDAO {
 	public boolean isCorrectId(long id) {
 		PreparedStatement preparedStatement;
 		try {
-			preparedStatement = dao.getConnection().prepareStatement(GET_BY_ID);
+			Connection connection = dao.getConnection();
+			preparedStatement = connection.prepareStatement(GET_BY_ID);
+
 			preparedStatement.setLong(1, id); 
 			ResultSet queryResult = preparedStatement.executeQuery();
 			if (!queryResult.next()) {
 				return false;
 			}
+			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

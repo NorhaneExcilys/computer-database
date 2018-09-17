@@ -1,5 +1,6 @@
 package persistance;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,6 +9,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 import model.Company;
 import model.Computer;
@@ -29,7 +32,6 @@ public class ComputerDAO {
 	private final static String ADD = "INSERT INTO computer (name, introduced, discontinued, company_id) VALUE (?, ?, ?, ?);";
 	private final static String UPDATE = "UPDATE computer SET name = ?, introduced = ?, discontinued = ?, company_id = ? WHERE id = ?;";
 	private final static String DELETE = "DELETE FROM computer WHERE id = ?";
-	
 	
 	/**
 	 * contains the singleton daoComputer
@@ -74,10 +76,16 @@ public class ComputerDAO {
 	 * @return the list of all computers
 	 */
 	public List<Computer> getComputers() {
-		ResultSet queryResult = dao.executeQuery(GET_ALL);
+		Connection connection = null;
+		ResultSet queryResult = null;
+		try {
+			connection = dao.getConnection();
+			queryResult = connection.createStatement().executeQuery(GET_ALL);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		List<Computer> computerList = new ArrayList<Computer>();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-		
 		try {
 			while (queryResult.next()) {
 				int currentId = queryResult.getInt("id");
@@ -106,10 +114,10 @@ public class ComputerDAO {
 				Computer currentComputer = new Computer(currentId, currentName, introducedDate, discontinuedDate, companyDAO.getCompanyById(currentCompanyId));
 				computerList.add(currentComputer);
 			}
+			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
 		return computerList;
 	}
 	
@@ -122,9 +130,9 @@ public class ComputerDAO {
 		Computer currentComputer = null;
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
 		try {
-			PreparedStatement preparedStatement = dao.getConnection().prepareStatement(GET_BY_ID);
+			Connection connection = dao.getConnection();
+			PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
 			preparedStatement.setLong(1, id);
-			
 			ResultSet queryResult = preparedStatement.executeQuery();
 			if(queryResult.next()) {
 				int currentId = queryResult.getInt("id");
@@ -152,6 +160,7 @@ public class ComputerDAO {
 				int currentCompanyId = queryResult.getInt("company_id");
 				currentComputer = new Computer(currentId, currentName, introducedDate, discontinuedDate, companyDAO.getCompanyById(currentCompanyId));
 			}
+			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -183,7 +192,9 @@ public class ComputerDAO {
 		
 		int queryResult = -1;
 		try {
-			PreparedStatement preparedStatement = dao.getConnection().prepareStatement(ADD);
+			Connection connection = dao.getConnection();
+			PreparedStatement preparedStatement = connection.prepareStatement(ADD);
+
 			preparedStatement.setString(1, name);
 			preparedStatement.setDate(2, sqlIntroducedDate);
 			preparedStatement.setDate(3, sqlDiscontinuedDate);
@@ -195,6 +206,7 @@ public class ComputerDAO {
 			}
 			
 			queryResult = preparedStatement.executeUpdate();
+			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -227,7 +239,9 @@ public class ComputerDAO {
 		}
 		
 		try {
-			PreparedStatement preparedStatement = dao.getConnection().prepareStatement(UPDATE);
+			Connection connection = dao.getConnection();
+			PreparedStatement preparedStatement = connection.prepareStatement(UPDATE);
+
 			preparedStatement.setString(1, computerName);
 			preparedStatement.setDate(2, sqlIntroducedDate);
 			preparedStatement.setDate(3, sqlDiscontinuedDate);
@@ -239,10 +253,10 @@ public class ComputerDAO {
 			}
 			preparedStatement.setLong(5, computerId);
 			queryResult = preparedStatement.executeUpdate();
+			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
 		
 		return queryResult;
 	}
@@ -255,9 +269,12 @@ public class ComputerDAO {
 	public int deleteComputerById(int id) {
 		int queryResult = -1;
 		try {
-			PreparedStatement preparedStatement = dao.getConnection().prepareStatement(DELETE);
+			Connection connection = dao.getConnection();
+			PreparedStatement preparedStatement = connection.prepareStatement(DELETE);
+
 			preparedStatement.setLong(1, id);
 			queryResult = preparedStatement.executeUpdate();
+			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -273,20 +290,19 @@ public class ComputerDAO {
 		
 		ResultSet queryResult = null;
 		try {
-			PreparedStatement preparedStatement = dao.getConnection().prepareStatement(GET_BY_ID);
+			Connection connection = dao.getConnection();
+			PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
+
 			preparedStatement.setLong(1, id);
 			queryResult = preparedStatement.executeQuery();
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-		
-		try {
 			if (!queryResult.next()) {
 				return false;
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
+
 		return true;
 	}
 	

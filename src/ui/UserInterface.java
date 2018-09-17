@@ -11,8 +11,6 @@ import model.Computer;
 import persistance.CompanyDAO;
 import persistance.ComputerDAO;
 import persistance.DAO;
-import service.CompanyService;
-import service.ComputerService;
 
 public class UserInterface {
 	
@@ -48,7 +46,7 @@ public class UserInterface {
 	 */
 	public void InitInterface() {
 		dao.loadDriver();
-		dao.connectDatabase();
+		//dao.connectDatabase();
 		
 		System.out.println("Hi, welcome to your database management application.\n");
 		getInstructions();
