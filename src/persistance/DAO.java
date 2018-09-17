@@ -1,4 +1,4 @@
-package service;
+package persistance;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -6,9 +6,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+
+
 /**
- * <b>DatabaseService is the class that enable a connection to a database thanks to JDBC.</b>
- * A DatabaseService is characterized by the following informations:
+ * <b>DAO is the class that enable a connection to a database thanks to JDBC.</b>
+ * A DAO is characterized by the following informations:
  * <ul>
  * <li> A connection</li>
  * </ul>
@@ -16,34 +18,34 @@ import java.sql.Statement;
  *
  */
 
-public class DatabaseService {
+public class DAO {
 
 	/**
-	 * contains the singleton databaseService
+	 * contains the singleton dao
 	 */
-	private static DatabaseService databaseService;
+	private static DAO dao;
 	
 	/**
-	 * contains the connection of this databaseService 
+	 * contains the connection of this dao 
 	 */
 	private Connection connection;
 	
 	/**
-	 * builds DatabaseService and initialize the attribute connection to null
+	 * builds dao and initialize the attribute connection to null
 	 */
-	private DatabaseService() {
+	private DAO() {
 		connection = null;
 	}
 
 	/**
-	 * builds DatabaseService if it isn't created or return the actual databaseService
+	 * builds dao if it isn't created or return the actual databaseService
 	 * @return the actual databaseService
 	 */
-	public static DatabaseService getInstance() {
-		if (databaseService == null) {
-			return new DatabaseService();
+	public static DAO getInstance() {
+		if (dao == null) {
+			return new DAO();
 		}
-		return databaseService;
+		return dao;
 	}
 	
 	
@@ -137,4 +139,5 @@ public class DatabaseService {
 	        }
 	    }
 	}
+	
 }

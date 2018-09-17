@@ -8,24 +8,26 @@ import java.util.Scanner;
 
 import model.Company;
 import model.Computer;
+import persistance.CompanyDAO;
+import persistance.ComputerDAO;
+import persistance.DAO;
 import service.CompanyService;
 import service.ComputerService;
-import service.DatabaseService;
 
 public class UserInterface {
 	
 	/**
 	 * contains the singleton databaseService
 	 */
-	private DatabaseService db;
+	private DAO dao;
 	/**
-	 * contains the singleton computerService
+	 * contains the singleton computerDAO
 	 */
-	private ComputerService computerService;
+	private ComputerDAO computerDAO;
 	/**
-	 * contains the singleton companyService
+	 * contains the singleton companyDAO
 	 */
-	private CompanyService companyService;
+	private CompanyDAO companyDAO;
 	/**
 	 * contains the scanner
 	 */
@@ -35,9 +37,9 @@ public class UserInterface {
 	 * builds a UserInterface and initialize the databaseService, computerService, companyService and scanner
 	 */
 	public UserInterface() {
-		db = DatabaseService.getInstance();
-		companyService = CompanyService.getInstance(db);
-		computerService = ComputerService.getInstance(db, companyService);
+		dao = DAO.getInstance();
+		companyDAO = CompanyDAO.getInstance(dao);
+		computerDAO = ComputerDAO.getInstance(dao, companyDAO);
 		scanner = new Scanner(System.in);
 	}
 	
@@ -45,8 +47,8 @@ public class UserInterface {
 	 * initializes the console interface, give informations to the user and gets his requests
 	 */
 	public void InitInterface() {
-		db.loadDriver();
-		db.connectDatabase();
+		dao.loadDriver();
+		dao.connectDatabase();
 		
 		System.out.println("Hi, welcome to your database management application.\n");
 		getInstructions();
@@ -106,7 +108,7 @@ public class UserInterface {
 	 * shows the informations of a computer
 	 */
 	public void showComputers() {
-		List<Computer> computers = computerService.getComputers();
+		List<Computer> computers = computerDAO.getComputers();
 		System.out.println("\n--- Here is the list of computers ---");
 		System.out.println("id name introduced discountinued company_id");
 		computers.forEach((v) -> System.out.println(v));
@@ -116,7 +118,7 @@ public class UserInterface {
 	 * shows all companies
 	 */
 	public void showCompanies() {
-		List<Company> companies = companyService.getCompanies();
+		List<Company> companies = companyDAO.getCompanies();
 		System.out.println("\n--- Here is the list of companies ---");
 		System.out.println("id name");
 		companies.forEach((v) -> System.out.println(v));
@@ -142,7 +144,7 @@ public class UserInterface {
 			}
 		} while (computerId < 0);
 		
-		Computer computer = computerService.getComputerById(computerId);
+		Computer computer = computerDAO.getComputerById(computerId);
 		System.out.println("\n--- Here is the information of the computer number " + computerId + " ---");
 		System.out.println(computer);
 	}
@@ -202,7 +204,7 @@ public class UserInterface {
 					System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the company of your computer. (If you don't want to enter this identifiant, please enter null)");
 				}
 				// Si companyId est incorrect alors, on recommence
-				if (!companyService.isCorrectId(companyId)) {
+				if (!companyDAO.isCorrectId(companyId)) {
 					companyId = -1;
 					System.out.println("This number doesn't correspond to a company. Please, enter the number of the identifiant of the company of your computer. (If you don't want to enter this identifiant, please enter null)");
 				}
@@ -213,10 +215,10 @@ public class UserInterface {
 		} while (!strCompanyId.equals("null") && companyId < 0);
 		
 		
-		Computer c = new Computer(computerName, introducedDate, discontinuedDate, companyService.getCompanyById(companyId));
+		Computer c = new Computer(computerName, introducedDate, discontinuedDate, companyDAO.getCompanyById(companyId));
 		
 		System.out.println();
-		int success = computerService.addComputer(c);
+		int success = computerDAO.addComputer(c);
 		if (success == 1) {
 			System.out.println("Your computer is now added");
 		}
@@ -242,7 +244,7 @@ public class UserInterface {
 				}
 				else {
 					// Si companyId est incorrect alors, on recommence
-					if (!computerService.isCorrectId(computerId)) {
+					if (!computerDAO.isCorrectId(computerId)) {
 						computerId = -1;
 						System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the computer you want to update.");
 					}
@@ -253,7 +255,7 @@ public class UserInterface {
 			}
 		} while (computerId < 0);
 		
-		Computer computer = computerService.getComputerById(computerId);
+		Computer computer = computerDAO.getComputerById(computerId);
 		long currentId = computer.getId();
 		String currentName = computer.getName();
 		LocalDate currentIntroducedDate = computer.getIntroducedDate();
@@ -403,7 +405,7 @@ public class UserInterface {
 						System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the company of your computer. (If you don't want to enter this identifiant, please enter null)");
 					}
 					// Si companyId est incorrect alors, on recommence
-					if (!companyService.isCorrectId(companyId)) {
+					if (!companyDAO.isCorrectId(companyId)) {
 						companyId = -1;
 						System.out.println("This number doesn't correspond to a company. Please, enter the number of the identifiant of the company of your computer. (If you don't want to enter this identifiant, please enter null)");
 					}
@@ -415,10 +417,10 @@ public class UserInterface {
 			currentCompanyId = companyId;
 		}
 		
-		Computer updatedComputer = new Computer(currentId, currentName, currentIntroducedDate, currentDiscontinuedDate, companyService.getCompanyById(currentCompanyId));
+		Computer updatedComputer = new Computer(currentId, currentName, currentIntroducedDate, currentDiscontinuedDate, companyDAO.getCompanyById(currentCompanyId));
 		
 		
-		int success = computerService.updateComputerById(updatedComputer);
+		int success = computerDAO.updateComputerById(updatedComputer);
 		if (success == 1) {
 			System.out.println("Computer number " + currentId + " is now update");
 		}
@@ -447,7 +449,7 @@ public class UserInterface {
 				}
 				else {
 					// Si companyId est incorrect alors, on recommence
-					if (!computerService.isCorrectId(computerId)) {
+					if (!computerDAO.isCorrectId(computerId)) {
 						computerId = -1;
 						System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the computer you want to delete.");
 					}
@@ -477,7 +479,7 @@ public class UserInterface {
 			}
 		} while(deleteComputer < 0);
 		if (deleteComputer == 1) {
-			int success = computerService.deleteComputerById(computerId);
+			int success = computerDAO.deleteComputerById(computerId);
 			if (success == 1) {
 				System.out.println("Computer number " + computerId + " is now deleted");
 			}
