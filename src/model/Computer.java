@@ -1,6 +1,6 @@
 package model;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 /**
  * <b>Computer is the class that represent a computer.</b>
@@ -10,7 +10,7 @@ import java.util.Date;
  * <li> A name.</li>
  * <li> An introduced date.</li>
  * <li> A discontinued date.</li>
- * <li> A company identifiant.</li>
+ * <li> A company identifier.</li>
  * </ul>
  * @author elgharbi
  *
@@ -29,11 +29,11 @@ public class Computer {
 	/**
 	 * contains the introduced date of this computer 
 	 */
-	private Date introducedDate;
+	private LocalDate introducedDate;
 	/**
 	 * contains the discontinued date of this computer 
 	 */
-	private Date discontinuedDate;
+	private LocalDate discontinuedDate;
 	/**
 	 * contains the company identifier of this computer 
 	 */
@@ -46,7 +46,7 @@ public class Computer {
 	 * @param discontinuedDate the discontinued date of the computer
 	 * @param companyId the company identifier of this computer
 	 */
-	public Computer(String name, Date introducedDate, Date discontinuedDate, long companyId) {
+	public Computer(String name, LocalDate introducedDate, LocalDate discontinuedDate, long companyId) {
 		this.name = name;
 		this.introducedDate = introducedDate;
 		this.discontinuedDate = discontinuedDate;
@@ -61,7 +61,7 @@ public class Computer {
 	 * @param discontinuedDate the discontinued date of the computer
 	 * @param companyId the company identifier of this computer
 	 */
-	public Computer(long id, String name, Date introducedDate, Date discontinuedDate, long companyId) {
+	public Computer(long id, String name, LocalDate introducedDate, LocalDate discontinuedDate, long companyId) {
 		this.id = id;
 		this.name = name;
 		this.introducedDate = introducedDate;
@@ -97,7 +97,7 @@ public class Computer {
 	 * Return the introduced date of this computer.
 	 * @return The introduced date of this computer.
 	 */
-	public Date getIntroducedDate() {
+	public LocalDate getIntroducedDate() {
 		return introducedDate;
 	}
 	
@@ -105,7 +105,7 @@ public class Computer {
 	 * change the actual introduced date of this computer
 	 * @param introducedDate the new introduced date
 	 */
-	public void setIntroducedDate(Date introducedDate) {
+	public void setIntroducedDate(LocalDate introducedDate) {
 		this.introducedDate = introducedDate;
 	}
 	
@@ -113,7 +113,7 @@ public class Computer {
 	 * Return the discontinued date of this computer.
 	 * @return The discontinued date of this computer.
 	 */
-	public Date getDiscontinuedDate() {
+	public LocalDate getDiscontinuedDate() {
 		return discontinuedDate;
 	}
 	
@@ -121,7 +121,7 @@ public class Computer {
 	 * change the actual discontinued date of this computer
 	 * @param discontinuedDate the new discontinued date
 	 */
-	public void setDiscontinuedDate(Date discontinuedDate) {
+	public void setDiscontinuedDate(LocalDate discontinuedDate) {
 		this.discontinuedDate = discontinuedDate;
 	}
 	

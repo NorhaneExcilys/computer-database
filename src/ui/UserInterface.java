@@ -2,6 +2,9 @@ package ui;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -158,33 +161,34 @@ public class UserInterface {
 		
 		// Introduced date
 		System.out.println("Please now enter the introduced date with the format dd/MM/yyyy. (If you don't want to enter this date, please enter null)");
-		Date introducedDate = null;
+		LocalDate introducedDate = null;
 		String strIntroducedDate = null;
 		do {
 			strIntroducedDate = scanner.nextLine();
 			try {
-				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-				introducedDate = simpleDateFormat.parse(strIntroducedDate);
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+				introducedDate = LocalDate.parse(strIntroducedDate, formatter);
 			}
-			catch (ParseException e) {
+			catch (DateTimeParseException e) {
 				if (!strIntroducedDate.equals("null")) {
 					System.out.println("This is an incorrect date. Please enter the introduced date with the format dd/MM/yyyy. (If you don't want to enter this date, please enter null)");
 				}
 			}
+
 		} while (!strIntroducedDate.equals("null") && introducedDate == null);
 		
 		// Discontinued date
 		System.out.println("Please now enter the discontinued date with the format dd/MM/yyyy. (If you don't want to enter this date, please enter null)");
-		Date discontinuedDate = null;
+		LocalDate discontinuedDate = null;
 		String strDiscontinuedDate = null;
 		do {
 			strDiscontinuedDate = scanner.nextLine();
 			try {
-				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-				discontinuedDate = simpleDateFormat.parse(strDiscontinuedDate);
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+				discontinuedDate = LocalDate.parse(strDiscontinuedDate, formatter);
 			}
-			catch (ParseException e) {
-				if (!strDiscontinuedDate.equals("null")) {
+			catch (DateTimeParseException e) {
+				if (!strIntroducedDate.equals("null")) {
 					System.out.println("This is an incorrect date. Please enter the discontinued date with the format dd/MM/yyyy. (If you don't want to enter this date, please enter null)");
 				}
 			}
@@ -253,8 +257,8 @@ public class UserInterface {
 		Computer computer = computerService.getComputerById(computerId);
 		long currentId = computer.getId();
 		String currentName = computer.getName();
-		Date currentIntroducedDate = computer.getIntroducedDate();
-		Date currentDiscontinuedDate = computer.getDiscontinuedDate();
+		LocalDate currentIntroducedDate = computer.getIntroducedDate();
+		LocalDate currentDiscontinuedDate = computer.getDiscontinuedDate();
 		long currentCompanyId = computer.getCompanyId();
 		
 		// Computer name
@@ -311,15 +315,15 @@ public class UserInterface {
         if (result == 1) {
         	// On lui demande la nouvelle date
         	System.out.println("Please now enter the introduced date with the format dd/MM/yyyy.");
-    		Date introducedDate = null;
+    		LocalDate introducedDate = null;
     		String strIntroducedDate = null;
     		do {
     			strIntroducedDate = scanner.nextLine();
     			try {
-    				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-    				introducedDate = simpleDateFormat.parse(strIntroducedDate);
+    				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    				introducedDate = LocalDate.parse(strIntroducedDate, formatter);
     			}
-    			catch (ParseException e) {
+    			catch (DateTimeParseException e) {
     				if (!strIntroducedDate.equals("null")) {
     					System.out.println("This is an incorrect date. Please enter the introduced date with the format dd/MM/yyyy.");
     				}
@@ -350,19 +354,20 @@ public class UserInterface {
         if (changeDiscontinuedDate == 1) {
         	// On lui demande la nouvelle date
         	System.out.println("Please now enter the discontinued date with the format dd/MM/yyyy.");
-    		Date discontinuedDate = null;
+    		LocalDate discontinuedDate = null;
     		String strDiscontinuedDate = null;
     		do {
     			strDiscontinuedDate = scanner.nextLine();
     			try {
-    				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-    				discontinuedDate = simpleDateFormat.parse(strDiscontinuedDate);
+    				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    				discontinuedDate = LocalDate.parse(strDiscontinuedDate, formatter);
     			}
-    			catch (ParseException e) {
+    			catch (DateTimeParseException e) {
     				if (!strDiscontinuedDate.equals("null")) {
     					System.out.println("This is an incorrect date. Please enter the discontinued date with the format dd/MM/yyyy.");
     				}
     			}
+
     		} while (discontinuedDate == null);
     		currentDiscontinuedDate = discontinuedDate;
         }

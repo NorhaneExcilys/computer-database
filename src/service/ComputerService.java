@@ -4,6 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -62,7 +65,7 @@ public class ComputerService {
 	public List<Computer> getComputers() {
 		ResultSet queryResult = databaseService.executeQuery("SELECT * FROM computer;");
 		List<Computer> computerList = new ArrayList<Computer>();
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
 		
 		try {
 			while (queryResult.next()) {
@@ -70,17 +73,23 @@ public class ComputerService {
 				String currentName = queryResult.getString("name");
 				String currentIntroducedDate = queryResult.getString("introduced");
 				String currentDiscontinuedDate = queryResult.getString("discontinued");
-				Date introducedDate = null;
-				Date discontinuedDate = null;
-				try {
-					if (currentIntroducedDate != null) {
-						introducedDate = simpleDateFormat.parse(currentIntroducedDate);
+				LocalDate introducedDate = null;
+				LocalDate discontinuedDate = null;
+				if (currentIntroducedDate != null) {
+					try {
+						introducedDate = LocalDate.parse(currentIntroducedDate, formatter);
 					}
-					if (currentDiscontinuedDate != null) {
-						discontinuedDate = simpleDateFormat.parse(currentDiscontinuedDate);
+					catch (DateTimeParseException ex) {
+						ex.printStackTrace();
 					}
-				} catch (ParseException e) {
-					e.printStackTrace();
+				}
+				if (currentDiscontinuedDate != null) {
+					try {
+						discontinuedDate = LocalDate.parse(currentDiscontinuedDate, formatter);
+					}
+					catch (DateTimeParseException ex) {
+						ex.printStackTrace();
+					}
 				}
 				int currentCompanyId = queryResult.getInt("company_id");
 				Computer currentComputer = new Computer(currentId, currentName, introducedDate, discontinuedDate, currentCompanyId);
@@ -101,7 +110,7 @@ public class ComputerService {
 	public Computer getComputerById(long id) {
 		Computer currentComputer = null;
 		ResultSet queryResult = databaseService.executeQuery("SELECT * FROM computer WHERE id = " + id + ";");
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
 		
 		try {
 			if(queryResult.next()) {
@@ -109,17 +118,23 @@ public class ComputerService {
 				String currentName = queryResult.getString("name");
 				String currentIntroducedDate = queryResult.getString("introduced");
 				String currentDiscontinuedDate = queryResult.getString("discontinued");
-				Date introducedDate = null;
-				Date discontinuedDate = null;
-				try {
-					if (currentIntroducedDate != null) {
-						introducedDate = simpleDateFormat.parse(currentIntroducedDate);
+				LocalDate introducedDate = null;
+				LocalDate discontinuedDate = null;
+				if (currentIntroducedDate != null) {
+					try {
+						introducedDate = LocalDate.parse(currentIntroducedDate, formatter);
 					}
-					if (currentDiscontinuedDate != null) {
-						discontinuedDate = simpleDateFormat.parse(currentDiscontinuedDate);
+					catch (DateTimeParseException ex) {
+						ex.printStackTrace();
 					}
-				} catch (ParseException e) {
-					e.printStackTrace();
+				}
+				if (currentDiscontinuedDate != null) {
+					try {
+						discontinuedDate = LocalDate.parse(currentDiscontinuedDate, formatter);
+					}
+					catch (DateTimeParseException ex) {
+						ex.printStackTrace();
+					}
 				}
 				int currentCompanyId = queryResult.getInt("company_id");
 				currentComputer = new Computer(currentId, currentName, introducedDate, discontinuedDate, currentCompanyId);
@@ -141,11 +156,11 @@ public class ComputerService {
 		String strCompanyId = companyId == -1 ? null : Long.toString(companyId);
 		
 		// Introduced Date
-		Date introducedDate = computer.getIntroducedDate();
+		LocalDate introducedDate = computer.getIntroducedDate();
 		java.sql.Date sqlIntroducedDate = null;
 		String computerIntroducedDate = null;
 		if (introducedDate != null) {
-			sqlIntroducedDate = new java.sql.Date(introducedDate.getTime());
+			sqlIntroducedDate = java.sql.Date.valueOf(introducedDate);
 			computerIntroducedDate = "'" + sqlIntroducedDate + "'";
 		}
 		else {
@@ -153,11 +168,11 @@ public class ComputerService {
 		}
 		
 		// Discontinued Date
-		Date discontinuedDate = computer.getDiscontinuedDate();
+		LocalDate discontinuedDate = computer.getDiscontinuedDate();
 		java.sql.Date sqlDiscontinuedDate = null;
 		String computerDiscontinuedDate = null;
 		if (discontinuedDate != null) {
-			sqlDiscontinuedDate = new java.sql.Date(discontinuedDate.getTime());
+			sqlDiscontinuedDate = java.sql.Date.valueOf(discontinuedDate);
 			computerDiscontinuedDate = "'" + sqlDiscontinuedDate + "'";
 		}
 		else {
@@ -178,11 +193,11 @@ public class ComputerService {
 		String computerName = computer.getName();
 		
 		// Introduced Date
-		Date introducedDate = computer.getIntroducedDate();
+		LocalDate introducedDate = computer.getIntroducedDate();
 		java.sql.Date sqlIntroducedDate = null;
 		String computerIntroducedDate = null;
 		if (introducedDate != null) {
-			sqlIntroducedDate = new java.sql.Date(introducedDate.getTime());
+			sqlIntroducedDate = java.sql.Date.valueOf(introducedDate);
 			computerIntroducedDate = "'" + sqlIntroducedDate + "'";
 		}
 		else {
@@ -190,11 +205,11 @@ public class ComputerService {
 		}
 		
 		// Discontinued Date
-		Date discontinuedDate = computer.getDiscontinuedDate();
+		LocalDate discontinuedDate = computer.getDiscontinuedDate();
 		java.sql.Date sqlDiscontinuedDate = null;
 		String computerDiscontinuedDate = null;
 		if (discontinuedDate != null) {
-			sqlDiscontinuedDate = new java.sql.Date(discontinuedDate.getTime());
+			sqlDiscontinuedDate = java.sql.Date.valueOf(discontinuedDate);
 			computerDiscontinuedDate = "'" + sqlDiscontinuedDate + "'";
 		}
 		else {
@@ -202,8 +217,6 @@ public class ComputerService {
 		}
 		
 		long computerCompanyId = computer.getCompanyId();
-		
-		System.out.println("UPDATE computer SET name = '" + computerName + "', introduced = " + sqlIntroducedDate + ", discontinued = " + sqlDiscontinuedDate + ", company_id = " + computerCompanyId + " WHERE id =" + computerId + ";");
 		
 		int queryResult = databaseService.executeUpdate("UPDATE computer SET name = '" + computerName + "', introduced = " + computerIntroducedDate + ", discontinued = " + computerDiscontinuedDate + ", company_id = " + computerCompanyId + " WHERE id =" + computerId + ";");
 		return queryResult;
@@ -231,7 +244,7 @@ public class ComputerService {
 				return false;
 			}
 		} catch (SQLException e) {
-
+			e.printStackTrace();
 		}
 		return true;
 	}
