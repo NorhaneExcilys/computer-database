@@ -63,7 +63,7 @@ public class ComputerService {
 	 * @return the list of all computers
 	 */
 	public List<Computer> getComputers() {
-		ResultSet queryResult = databaseService.executeQuery("SELECT * FROM computer;");
+		ResultSet queryResult = databaseService.executeQuery("SELECT id, name, introduced, discontinued, company_id  FROM computer;");
 		List<Computer> computerList = new ArrayList<Computer>();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
 		
@@ -109,7 +109,7 @@ public class ComputerService {
 	 */
 	public Computer getComputerById(long id) {
 		Computer currentComputer = null;
-		ResultSet queryResult = databaseService.executeQuery("SELECT * FROM computer WHERE id = " + id + ";");
+		ResultSet queryResult = databaseService.executeQuery("SELECT id, name, introduced, discontinued, company_id FROM computer WHERE id = " + id + ";");
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
 		
 		try {
@@ -238,7 +238,7 @@ public class ComputerService {
 	 * @return true if the identifier of the computer is correct and false if not
 	 */
 	public boolean isCorrectId(long id) {
-		ResultSet quertyResult = databaseService.executeQuery("SELECT * FROM computer WHERE id = " + id + ";");
+		ResultSet quertyResult = databaseService.executeQuery("SELECT id, name, introduced, discontinued, company_id FROM computer WHERE id = " + id + ";");
 		try {
 			if (!quertyResult.next()) {
 				return false;

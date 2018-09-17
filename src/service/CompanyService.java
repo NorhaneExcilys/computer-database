@@ -56,7 +56,7 @@ public class CompanyService {
 	 * @return the list of all companies
 	 */
 	public List<Company> getCompanies() {
-		ResultSet quertyResult = databaseService.executeQuery("SELECT * FROM company;");
+		ResultSet quertyResult = databaseService.executeQuery("SELECT id, name FROM company;");
 		List<Company> companyList = new ArrayList<Company>();
 		
 		try {
@@ -79,7 +79,7 @@ public class CompanyService {
 	 * @return true if the identifier of the company is correct and false if not
 	 */
 	public boolean isCorrectId(long id) {
-		ResultSet quertyResult = databaseService.executeQuery("SELECT * FROM company WHERE id = " + id + ";");
+		ResultSet quertyResult = databaseService.executeQuery("SELECT id, name FROM company WHERE id = " + id + ";");
 		try {
 			if (!quertyResult.next()) {
 				return false;
