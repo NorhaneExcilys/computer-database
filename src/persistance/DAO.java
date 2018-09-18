@@ -27,9 +27,13 @@ public class DAO {
 	 */
 	public static DAO getInstance() {
 		if (dao == null) {
-			return new DAO();
+			dao = new DAO();
 		}
 		return dao;
+	}
+	
+	public DAO () {
+		loadDriver();
 	}
 	
 	public Connection getConnection() {

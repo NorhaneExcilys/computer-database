@@ -33,14 +33,14 @@ public class CompanyDAO {
 	/**
 	 * contains the dao
 	 */
-	public DAO dao;
+	private DAO dao;
 	
 	/**
 	 * builds CompanyDAO defined by dao
 	 * @param dao the dao
 	 */
-	private CompanyDAO(DAO dao) {
-		this.dao = dao;
+	private CompanyDAO() {
+		this.dao = DAO.getInstance();
 	}
 
 	/**
@@ -48,9 +48,9 @@ public class CompanyDAO {
 	 * @param dao the dao
 	 * @return the actual companyDAO
 	 */
-	public static CompanyDAO getInstance(DAO dao) {
+	public static CompanyDAO getInstance() {
 		if (companyDAO == null) {
-			return new CompanyDAO(dao);
+			companyDAO = new CompanyDAO();
 		}
 		return companyDAO;
 	}

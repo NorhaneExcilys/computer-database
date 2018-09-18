@@ -41,21 +41,21 @@ public class ComputerDAO {
 	/**
 	 * contains the daoCompany
 	 */
-	public CompanyDAO companyDAO;
+	private CompanyDAO companyDAO;
 	
 	/**
 	 * contains the dao
 	 */
-	public DAO dao;
+	private DAO dao;
 	
 	/**
 	 * builds DAOComputer defined by dao
 	 * @param dao the dao
 	 * @param daoCompany the daoCompany
 	 */
-	private ComputerDAO(DAO dao, CompanyDAO companyDAO) {
-		this.dao = dao;
-		this.companyDAO = companyDAO;
+	private ComputerDAO() {
+		this.dao = DAO.getInstance();
+		this.companyDAO = CompanyDAO.getInstance();
 	}
 	
 	/**
@@ -64,9 +64,9 @@ public class ComputerDAO {
 	 * @param daoCompany the companyDAO
 	 * @return the actual computerDAO
 	 */
-	public static ComputerDAO getInstance(DAO dao, CompanyDAO companyDAO) {
+	public static ComputerDAO getInstance() {
 		if (computerDAO == null) {
-			return new ComputerDAO(dao, companyDAO);
+			computerDAO = new ComputerDAO();
 		}
 		return computerDAO;
 	}

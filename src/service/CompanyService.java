@@ -4,23 +4,20 @@ import java.util.List;
 
 import model.Company;
 import persistance.CompanyDAO;
-import persistance.DAO;
 
 public class CompanyService {
 	
-	public DAO dao;
-	public CompanyDAO companyDAO;
+	private CompanyDAO companyDAO;
 	
 	private static CompanyService companyService;
 	
 	public CompanyService () {
-		this.dao = DAO.getInstance();
-		this.companyDAO = CompanyDAO.getInstance(dao);
+		this.companyDAO = CompanyDAO.getInstance();
 	}
 	
 	public static CompanyService getInstance() {
 		if (companyService == null) {
-			return new CompanyService();
+			companyService = new CompanyService();
 		}
 		return companyService;
 	}

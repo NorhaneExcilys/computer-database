@@ -3,27 +3,21 @@ package service;
 import java.util.List;
 
 import model.Computer;
-import persistance.CompanyDAO;
 import persistance.ComputerDAO;
-import persistance.DAO;
 
 public class ComputerService {
 
-	public DAO dao;
-	public CompanyDAO companyDAO;
-	public ComputerDAO computerDAO;
+	private ComputerDAO computerDAO;
 	
 	private static ComputerService computerService;
 	
 	public ComputerService () {
-		this.dao = DAO.getInstance();
-		this.companyDAO = CompanyDAO.getInstance(dao);
-		this.computerDAO = ComputerDAO.getInstance(dao, companyDAO);
+		this.computerDAO = ComputerDAO.getInstance();
 	}
 	
 	public static ComputerService getInstance() {
 		if (computerService == null) {
-			return new ComputerService();
+			computerService = new ComputerService();
 		}
 		return computerService;
 	}

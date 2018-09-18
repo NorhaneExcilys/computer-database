@@ -8,13 +8,11 @@ import java.util.Scanner;
 
 import model.Company;
 import model.Computer;
-import persistance.DAO;
 import service.CompanyService;
 import service.ComputerService;
 
 public class UserInterface {
 	
-	private DAO dao;
 	/**
 	 * contains the singleton computerDAO
 	 */
@@ -32,7 +30,6 @@ public class UserInterface {
 	 * builds a UserInterface and initialize the databaseService, computerService, companyService and scanner
 	 */
 	public UserInterface() {
-		dao = DAO.getInstance();
 		companyService = CompanyService.getInstance();
 		computerService = ComputerService.getInstance();
 		scanner = new Scanner(System.in);
@@ -42,9 +39,6 @@ public class UserInterface {
 	 * initializes the console interface, give informations to the user and gets his requests
 	 */
 	public void InitInterface() {
-		dao.loadDriver();
-		//dao.connectDatabase();
-		
 		System.out.println("Hi, welcome to your database management application.\n");
 		getInstructions();
 		
