@@ -1,8 +1,12 @@
 package persistance;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 /**
  * <b>DAO is the class that enable a connection to a database thanks to JDBC.</b>
@@ -15,7 +19,11 @@ import java.sql.SQLException;
  */
 
 public class DAO {
-
+	
+	private static String database;
+	private static String dbuser;
+	private static String dbpassword;
+	
 	/**
 	 * contains the singleton dao
 	 */
@@ -33,16 +41,39 @@ public class DAO {
 	}
 	
 	public DAO () {
+		Properties prop = new Properties();
+		InputStream input = null;
+
+		try {
+			input = new FileInputStream("config.properties");
+
+			// load a properties file
+			prop.load(input);
+
+			// get the property value
+			database = prop.getProperty("database");
+			dbuser = prop.getProperty("dbuser");
+			dbpassword = prop.getProperty("dbpassword");
+
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 		loadDriver();
 	}
 	
 	public Connection getConnection() {
-		String url = "jdbc:mysql://localhost:3306/computer-database-db";
-		String user = "admincdb";
-		String password = "qwerty1234";
 		Connection connection = null;
 		try {
-			connection = DriverManager.getConnection(url, user, password);
+			connection = DriverManager.getConnection(database, dbuser, dbpassword);
 		} catch (SQLException e) {
 
 		}
