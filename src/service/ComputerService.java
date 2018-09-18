@@ -23,11 +23,11 @@ public class ComputerService {
 	}
 	
 	public List<Computer> getComputers() {
-		return computerDAO.getComputers();
+		return computerDAO.getAll();
 	}
 	
 	public Computer getComputerById(long id) {
-		return computerDAO.getComputerById(id);
+		return computerDAO.getById(id);
 	}
 
 	public boolean isCorrectId(long id) {

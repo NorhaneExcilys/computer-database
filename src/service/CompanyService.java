@@ -23,7 +23,7 @@ public class CompanyService {
 	}
 	
 	public List<Company> getCompanies() {
-		return companyDAO.getCompanies();
+		return companyDAO.getAll();
 	}
 	
 	public boolean isCorrectId(long id) {
@@ -31,6 +31,6 @@ public class CompanyService {
 	}
 	
 	public Company getCompanyById(long id) {
-		return companyDAO.getCompanyById(id);
+		return companyDAO.getById(id);
 	}
 }

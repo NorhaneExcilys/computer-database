@@ -24,15 +24,7 @@ public class CompanyDAO {
 	private final static String GET_ALL = "SELECT id, name FROM company;";
 	private final static String GET_BY_ID = "SELECT id, name FROM company WHERE id = ?;";
 	
-	
-	/**
-	 * contains the singleton companyDAO
-	 */
 	private static CompanyDAO companyDAO;
-	
-	/**
-	 * contains the dao
-	 */
 	private DAO dao;
 	
 	/**
@@ -59,30 +51,25 @@ public class CompanyDAO {
 	 * return the list of all companies in the database company
 	 * @return the list of all companies
 	 */
-	public List<Company> getCompanies() {
-		Connection connection = null;
-		ResultSet queryResult = null;
-		try {
-			connection = dao.getConnection();
-			queryResult = connection.createStatement().executeQuery(GET_ALL);
-
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-		List<Company> companyList = new ArrayList<Company>();
-		try {
+	public List<Company> getAll() {
+		
+		// TODO Return optional
+		
+		List<Company> allCompanies = new ArrayList<Company>();
+		
+		try (Connection connection = dao.getConnection()) {
+			ResultSet queryResult = connection.createStatement().executeQuery(GET_ALL);
 			while (queryResult.next()) {
 				long currentId = queryResult.getLong("id");
 				String currentName = queryResult.getString("name");
-
 				Company currentCompany = new Company(currentId, currentName);
-				companyList.add(currentCompany);
+				allCompanies.add(currentCompany);
 			}
-			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return companyList;
+		
+		return allCompanies;
 	}
 	
 	/**
@@ -90,24 +77,26 @@ public class CompanyDAO {
 	 * @param id the identifier of the company
 	 * @return the company chosen by identifier
 	 */
-	public Company getCompanyById(long id) {
-		Company currentCompany = null;
-		try {
-			Connection connection = dao.getConnection();
+	public Company getById(long id) {
+		
+		// TODO Return optional
+		
+		Company company = null;
+		
+		try (Connection connection = dao.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
-
 			preparedStatement.setLong(1, id); 
 			ResultSet queryResult = preparedStatement.executeQuery();
 			if(queryResult.next()) {
 				int currentId = queryResult.getInt("id");
 				String currentName = queryResult.getString("name");
-				currentCompany = new Company(currentId, currentName);
+				company = new Company(currentId, currentName);
 			}
-			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return currentCompany;
+		
+		return company;
 	}
 	
 	/**
@@ -116,20 +105,20 @@ public class CompanyDAO {
 	 * @return true if the identifier of the company is correct and false if not
 	 */
 	public boolean isCorrectId(long id) {
-		PreparedStatement preparedStatement;
-		try {
-			Connection connection = dao.getConnection();
-			preparedStatement = connection.prepareStatement(GET_BY_ID);
-
+		
+		// TODO Return optional
+		
+		try (Connection connection = dao.getConnection()) {
+			PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
 			preparedStatement.setLong(1, id); 
 			ResultSet queryResult = preparedStatement.executeQuery();
 			if (!queryResult.next()) {
 				return false;
 			}
-			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		
 		return true;
 	}
 	

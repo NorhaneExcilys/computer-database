@@ -1,6 +1,7 @@
 package persistance;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -11,9 +12,6 @@ import java.util.Properties;
 /**
  * <b>DAO is the class that enable a connection to a database thanks to JDBC.</b>
  * A DAO is characterized by the following informations:
- * <ul>
- * <li> A connection</li>
- * </ul>
  * @author elgharbi
  *
  */
@@ -24,14 +22,11 @@ public class DAO {
 	private static String dbuser;
 	private static String dbpassword;
 	
-	/**
-	 * contains the singleton dao
-	 */
 	private static DAO dao;
 
 	/**
-	 * builds dao if it isn't created or return the actual databaseService
-	 * @return the actual databaseService
+	 * builds dao if it isn't created or return the actual DAO
+	 * @return the actual DAO
 	 */
 	public static DAO getInstance() {
 		if (dao == null) {
@@ -41,41 +36,20 @@ public class DAO {
 	}
 	
 	public DAO () {
-		Properties prop = new Properties();
-		InputStream input = null;
-
-		try {
-			input = new FileInputStream("config.properties");
-
-			// load a properties file
-			prop.load(input);
-
-			// get the property value
-			database = prop.getProperty("database");
-			dbuser = prop.getProperty("dbuser");
-			dbpassword = prop.getProperty("dbpassword");
-
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		
+		fillDbProperties();
 		loadDriver();
 	}
 	
+	/**
+	 * Returns a new connection to the database
+	 * @return a new connection to the database
+	 */
 	public Connection getConnection() {
 		Connection connection = null;
 		try {
 			connection = DriverManager.getConnection(database, dbuser, dbpassword);
 		} catch (SQLException e) {
-
+			e.printStackTrace();
 		}
 		return connection;
 	}
@@ -86,8 +60,25 @@ public class DAO {
 	public void loadDriver() {
 		try {
 		    Class.forName("com.mysql.jdbc.Driver");
-		} catch ( ClassNotFoundException e ) {
-		    
+		} catch (ClassNotFoundException e) {
+		    e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Fill in the database identifiers database, dbuser and dbpassword
+	 */
+	public void fillDbProperties() {
+		Properties properties = new Properties();
+		try (InputStream input = new FileInputStream("config.properties")) {
+			properties.load(input);
+			database = properties.getProperty("database");
+			dbuser = properties.getProperty("dbuser");
+			dbpassword = properties.getProperty("dbpassword");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	

@@ -33,19 +33,10 @@ public class ComputerDAO {
 	private final static String UPDATE = "UPDATE computer SET name = ?, introduced = ?, discontinued = ?, company_id = ? WHERE id = ?;";
 	private final static String DELETE = "DELETE FROM computer WHERE id = ?";
 	
-	/**
-	 * contains the singleton daoComputer
-	 */
+
 	private static ComputerDAO computerDAO;
-	
-	/**
-	 * contains the daoCompany
-	 */
+
 	private CompanyDAO companyDAO;
-	
-	/**
-	 * contains the dao
-	 */
 	private DAO dao;
 	
 	/**
@@ -75,96 +66,77 @@ public class ComputerDAO {
 	 * return the list of all computers in the database computer
 	 * @return the list of all computers
 	 */
-	public List<Computer> getComputers() {
-		Connection connection = null;
-		ResultSet queryResult = null;
-		try {
-			connection = dao.getConnection();
-			queryResult = connection.createStatement().executeQuery(GET_ALL);
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-		List<Computer> computerList = new ArrayList<Computer>();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-		try {
+	public List<Computer> getAll() {
+		List<Computer> allComputers = new ArrayList<Computer>();
+		
+		try (Connection connection = dao.getConnection()) {
+			ResultSet queryResult = connection.createStatement().executeQuery(GET_ALL);
 			while (queryResult.next()) {
 				int currentId = queryResult.getInt("id");
 				String currentName = queryResult.getString("name");
-				String currentIntroducedDate = queryResult.getString("introduced");
-				String currentDiscontinuedDate = queryResult.getString("discontinued");
-				LocalDate introducedDate = null;
-				LocalDate discontinuedDate = null;
-				if (currentIntroducedDate != null) {
-					try {
-						introducedDate = LocalDate.parse(currentIntroducedDate, formatter);
-					}
-					catch (DateTimeParseException ex) {
-						ex.printStackTrace();
-					}
-				}
-				if (currentDiscontinuedDate != null) {
-					try {
-						discontinuedDate = LocalDate.parse(currentDiscontinuedDate, formatter);
-					}
-					catch (DateTimeParseException ex) {
-						ex.printStackTrace();
-					}
-				}
+				LocalDate introducedDate = stringToLocalDate(queryResult.getString("introduced"));
+				LocalDate discontinuedDate = stringToLocalDate(queryResult.getString("discontinued"));
 				long currentCompanyId = queryResult.getLong("company_id");
-				Computer currentComputer = new Computer(currentId, currentName, introducedDate, discontinuedDate, companyDAO.getCompanyById(currentCompanyId));
-				computerList.add(currentComputer);
+				Computer currentComputer = new Computer(currentId, currentName, introducedDate, discontinuedDate, companyDAO.getById(currentCompanyId));
+				allComputers.add(currentComputer);
 			}
-			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return computerList;
+
+		return allComputers;
 	}
+	
+	
+	public LocalDate stringToLocalDate(String strDate) {
+		// TODO Si la date est Null
+		
+		LocalDate localDate = null;
+		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+		if (strDate != null) {
+			try {
+				localDate = LocalDate.parse(strDate, formatter);
+			}
+			catch (DateTimeParseException ex) {
+				ex.printStackTrace();
+			}
+		}
+		
+		return localDate;
+	}
+	
 	
 	/**
 	 * return the computer chosen by identifier
 	 * @param id the identifier of the computer
 	 * @return the computer chosen by identifier
 	 */
-	public Computer getComputerById(long id) {
-		Computer currentComputer = null;
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-		try {
-			Connection connection = dao.getConnection();
+	public Computer getById(long id) {
+		
+		// TODO Return optional
+		
+		Computer computer = null;
+		
+		try (Connection connection = dao.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
 			preparedStatement.setLong(1, id);
+			
 			ResultSet queryResult = preparedStatement.executeQuery();
+			
 			if(queryResult.next()) {
 				int currentId = queryResult.getInt("id");
 				String currentName = queryResult.getString("name");
-				String currentIntroducedDate = queryResult.getString("introduced");
-				String currentDiscontinuedDate = queryResult.getString("discontinued");
-				LocalDate introducedDate = null;
-				LocalDate discontinuedDate = null;
-				if (currentIntroducedDate != null) {
-					try {
-						introducedDate = LocalDate.parse(currentIntroducedDate, formatter);
-					}
-					catch (DateTimeParseException ex) {
-						ex.printStackTrace();
-					}
-				}
-				if (currentDiscontinuedDate != null) {
-					try {
-						discontinuedDate = LocalDate.parse(currentDiscontinuedDate, formatter);
-					}
-					catch (DateTimeParseException ex) {
-						ex.printStackTrace();
-					}
-				}
+				LocalDate introducedDate = stringToLocalDate(queryResult.getString("introduced"));
+				LocalDate discontinuedDate = stringToLocalDate(queryResult.getString("discontinued"));
 				int currentCompanyId = queryResult.getInt("company_id");
-				currentComputer = new Computer(currentId, currentName, introducedDate, discontinuedDate, companyDAO.getCompanyById(currentCompanyId));
+				computer = new Computer(currentId, currentName, introducedDate, discontinuedDate, companyDAO.getById(currentCompanyId));
 			}
-			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return currentComputer;
+		
+		return computer;
 	}
 
 	/**
@@ -238,10 +210,8 @@ public class ComputerDAO {
 			sqlDiscontinuedDate = java.sql.Date.valueOf(discontinuedDate);
 		}
 		
-		try {
-			Connection connection = dao.getConnection();
+		try (Connection connection = dao.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(UPDATE);
-
 			preparedStatement.setString(1, computerName);
 			preparedStatement.setDate(2, sqlIntroducedDate);
 			preparedStatement.setDate(3, sqlDiscontinuedDate);
@@ -253,7 +223,6 @@ public class ComputerDAO {
 			}
 			preparedStatement.setLong(5, computerId);
 			queryResult = preparedStatement.executeUpdate();
-			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -267,17 +236,17 @@ public class ComputerDAO {
 	 * @return 1 if the computer is deleted and 0 if not
 	 */
 	public int deleteComputerById(int id) {
+		// TODO Bien gérer le retour
 		int queryResult = -1;
-		try {
-			Connection connection = dao.getConnection();
+		
+		try (Connection connection = dao.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(DELETE);
-
 			preparedStatement.setLong(1, id);
 			queryResult = preparedStatement.executeUpdate();
-			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+
 		return queryResult;
 	}
 	
@@ -287,22 +256,18 @@ public class ComputerDAO {
 	 * @return true if the identifier of the computer is correct and false if not
 	 */
 	public boolean isCorrectId(long id) {
+		// TODO Attention ca fonctionne pas, on renvoit quoi ? 
 		
-		ResultSet queryResult = null;
-		try {
-			Connection connection = dao.getConnection();
+		try (Connection connection = dao.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
-
 			preparedStatement.setLong(1, id);
-			queryResult = preparedStatement.executeQuery();
+			ResultSet queryResult = preparedStatement.executeQuery();
 			if (!queryResult.next()) {
 				return false;
 			}
-			connection.close();
-		} catch (SQLException e1) {
-			e1.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-
 		return true;
 	}
 	
