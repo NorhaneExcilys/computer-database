@@ -1,11 +1,15 @@
 package ui;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
+import exception.DatabaseException;
+import exception.UnknowCompanyException;
+import exception.UnknowComputerException;
+import exception.UnknowMenuException;
 import model.Company;
 import model.Computer;
 import service.CompanyService;
@@ -13,17 +17,10 @@ import service.ComputerService;
 
 public class UserInterface {
 	
-	/**
-	 * contains the singleton computerDAO
-	 */
 	private ComputerService computerService;
-	/**
-	 * contains the singleton companyDAO
-	 */
 	private CompanyService companyService;
-	/**
-	 * contains the scanner
-	 */
+	private InputManager inputManager;
+
 	private Scanner scanner;
 	
 	/**
@@ -33,51 +30,54 @@ public class UserInterface {
 		companyService = CompanyService.getInstance();
 		computerService = ComputerService.getInstance();
 		scanner = new Scanner(System.in);
+		inputManager = new InputManager();
 	}
 	
 	/**
 	 * initializes the console interface, give informations to the user and gets his requests
 	 */
 	public void InitInterface() {
-		System.out.println("Hi, welcome to your database management application.\n");
+		System.out.println("Hi, welcome to your database management application.");
 		getInstructions();
 		
-		String str = "";
-		
+		Optional<MenuEnum> userInput = Optional.empty();
 		do {
 			System.out.println("\nPlease enter a number between 1 and 7 (Enter help for more informations).");
-			str = scanner.nextLine();
-			switch (str.trim()) {
-	        	case "1":
-	        		showComputers();
-	                break;
-	        	case "2":
-	        		showCompanies();
-	                break;
-	        	case "3":
-	        		showComputerById();
-	        		break;
-	        	case "4":
-	        		addComputer();
-	        		break;
-	        	case "5":
-	        		updateComputerInformations();
-	        		break;
-	        	case "6":
-	        		deleteComputer();
-	        		break;
-	        	case "7":
-	        		closeApplication();
-	                break;
-	        	case "help":
-	        		getInstructions();
-	        		break;
-	        	default:
-	        		enterInvalid();
-	                break;
+			String str = scanner.nextLine();
+			try {
+				userInput = Optional.of(MenuEnum.stringToMenuEnum(str));
+				switch (userInput.get()) {
+		        	case GET_COMPUTERS:
+		        		showComputers();
+		                break;
+		        	case GET_COMPANIES:
+		        		showCompanies();
+		                break;
+		        	case GET_COMPUTER_BY_ID:
+		        		showComputerById();
+		        		break;
+		        	case ADD_COMPUTER:
+		        		addComputer();
+		        		break;
+		        	case UPDATE_COMPUTER:
+		        		updateComputerInformations();
+		        		break;
+		        	case DELETE_COMPUTER:
+		        		deleteComputer();
+		        		break;
+		        	case QUIT:
+		        		closeApplication();
+		                break;
+		        	case HELP:
+		        		getInstructions();
+		        		break;
+				}
+			}
+			catch (UnknowMenuException e) {
+				System.out.println(e.getMessage());
 			}
         }
-        while(!str.trim().equals("7"));
+        while(userInput.get() != MenuEnum.QUIT);
 	}
 	
 	/**
@@ -97,45 +97,105 @@ public class UserInterface {
 	 * shows the informations of a computer
 	 */
 	public void showComputers() {
-		List<Computer> computers = computerService.getComputers();
-		System.out.println("\n--- Here is the list of computers ---");
-		System.out.println("id name introduced discountinued company_id");
-		computers.forEach((v) -> System.out.println(v));
+		List<Computer> computers = new ArrayList<Computer>();
+		try {
+			computers = computerService.getComputers();
+			if (computers.size() > 0) {
+				computers.forEach((v) -> System.out.println(v));
+			}
+			else {
+				System.out.println("Sorry, there is no computer in the database");
+			}
+		} catch (DatabaseException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (UnknowCompanyException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
 	 * shows all companies
 	 */
 	public void showCompanies() {
-		List<Company> companies = companyService.getCompanies();
-		System.out.println("\n--- Here is the list of companies ---");
-		System.out.println("id name");
-		companies.forEach((v) -> System.out.println(v));
+		List<Company> companies = new ArrayList<Company>();
+		
+		try {
+			companies = companyService.getCompanies();
+			if (companies.size() > 0) {
+				companies.forEach((v) -> System.out.println(v));
+			}
+			else {
+				System.out.println("Sorry, there is no company in the database");
+			}
+		} catch (DatabaseException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
 	}
 	
 	/**
 	 * shows the informations of a chosen computer
 	 */
 	public void showComputerById() {
-		System.out.println("Enter the number of the computer.");
+		System.out.println("Enter the number of the computer you want to show.");
 		
 		int computerId = -1;
+		Optional<Computer> computer = Optional.empty();
+		
 		do {
-			String str = scanner.nextLine();
+			String input = scanner.nextLine();	
 			try {
-				computerId = Integer.parseInt(str);
+				computerId = Integer.parseInt(input);
 				if (computerId < 0) {
-					System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the computer.");
+					throw new NumberFormatException();
 				}
+				computer = computerService.getById(computerId);
+			} catch (NumberFormatException e) {
+				System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the computer.");
+			} catch (DatabaseException e) {
+				System.out.println(e.getMessage());
+				e.printStackTrace();
+			} catch (UnknowComputerException e) {
+				System.out.println(e.getMessage());
+			} catch (UnknowCompanyException e) {
+				System.out.println(e.getMessage());
+				e.printStackTrace();
+			}
+		} while (!computer.isPresent());
+		
+		System.out.println("Here is the information of the computer number " + computerId);
+		System.out.println(computer.get());
+	}
+	
+	/**
+	 * deletes a computer
+	 */
+	public void deleteComputer() {
+		System.out.println("Please enter the number of the computer you want to delete.");
+		
+		int computerId = -1;
+		boolean success = false;
+		
+		do {
+			String input = scanner.nextLine();
+			try {
+				computerId = Integer.parseInt(input);
+				if (computerId < 0) {
+					throw new NumberFormatException();
+				}
+				success = computerService.deleteComputerById(computerId);
 			}
 			catch (NumberFormatException e) {
 				System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the computer.");
+			} catch (DatabaseException e) {
+				e.printStackTrace();
+			} catch (UnknowComputerException e) {
+				System.out.println(e.getMessage());
 			}
-		} while (computerId < 0);
+		} while (!success);
 		
-		Computer computer = computerService.getComputerById(computerId);
-		System.out.println("\n--- Here is the information of the computer number " + computerId + " ---");
-		System.out.println(computer);
+		System.out.println("Computer number " + computerId + " is now deleted");
 	}
 	
 	/**
@@ -144,75 +204,34 @@ public class UserInterface {
 	public void addComputer() {
 		// Name
 		System.out.println("Please enter the name of the computer you want to add.");
-		String computerName = scanner.nextLine();
+		String computerName = inputManager.askComputerName();
 		
 		// Introduced date
-		System.out.println("Please now enter the introduced date with the format dd/MM/yyyy. (If you don't want to enter this date, please enter null)");
-		LocalDate introducedDate = null;
-		String strIntroducedDate = null;
-		do {
-			strIntroducedDate = scanner.nextLine();
-			try {
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-				introducedDate = LocalDate.parse(strIntroducedDate, formatter);
-			}
-			catch (DateTimeParseException e) {
-				if (!strIntroducedDate.equals("null")) {
-					System.out.println("This is an incorrect date. Please enter the introduced date with the format dd/MM/yyyy. (If you don't want to enter this date, please enter null)");
-				}
-			}
-
-		} while (!strIntroducedDate.equals("null") && introducedDate == null);
+		System.out.println("Please enter the introduced date with the format dd/MM/yyyy.\n"
+				+ "If you don\'t want to enter this date, please press button ENTER.");
+		Optional<LocalDate> introducedDate = inputManager.askDate();
 		
 		// Discontinued date
-		System.out.println("Please now enter the discontinued date with the format dd/MM/yyyy. (If you don't want to enter this date, please enter null)");
-		LocalDate discontinuedDate = null;
-		String strDiscontinuedDate = null;
-		do {
-			strDiscontinuedDate = scanner.nextLine();
-			try {
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-				discontinuedDate = LocalDate.parse(strDiscontinuedDate, formatter);
-			}
-			catch (DateTimeParseException e) {
-				if (!strIntroducedDate.equals("null")) {
-					System.out.println("This is an incorrect date. Please enter the discontinued date with the format dd/MM/yyyy. (If you don't want to enter this date, please enter null)");
-				}
-			}
-		} while (!strDiscontinuedDate.equals("null") && discontinuedDate == null);
+		System.out.println("Please enter the discontinued date with the format dd/MM/yyyy.\n"
+				+ "If you don\'t want to enter this date, please press button ENTER.");
+		Optional<LocalDate> discontinuedDate = inputManager.askDate();
 
 		// Company Id
-		System.out.println("Please now enter the company identifiant of your computer. (If you don't want to enter this identifiant, please enter null)");
-		int companyId = -1;
-		String strCompanyId = null;
-		do {
-			strCompanyId = scanner.nextLine();
-			try {
-				companyId = Integer.parseInt(strCompanyId);
-				if (companyId < 0) {
-					System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the company of your computer. (If you don't want to enter this identifiant, please enter null)");
-				}
-				// Si companyId est incorrect alors, on recommence
-				if (!companyService.isCorrectId(companyId)) {
-					companyId = -1;
-					System.out.println("This number doesn't correspond to a company. Please, enter the number of the identifiant of the company of your computer. (If you don't want to enter this identifiant, please enter null)");
-				}
-			}
-			catch (NumberFormatException e) {
-				System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the computer.");
-			}
-		} while (!strCompanyId.equals("null") && companyId < 0);
+		System.out.println("Please enter the company identifier of your computer.\n"
+				+ "If you don't want to enter this identifier, please press button ENTER.");
+		Optional<Company> company = inputManager.askCompany();
 		
-		
-		Computer c = new Computer(computerName, introducedDate, discontinuedDate, companyService.getCompanyById(companyId));
-		
-		System.out.println();
-		int success = computerService.addComputer(c);
-		if (success == 1) {
-			System.out.println("Your computer is now added");
+		Computer computer;
+		boolean success = false;
+		try {
+			computer = new Computer(computerName, introducedDate, discontinuedDate, company);
+			success = computerService.addComputer(computer);
+		} catch (DatabaseException e) {
+			System.out.print(e.getMessage());
 		}
-		else {
-			System.out.println("Your computer is not added");
+		
+		if (success) {
+			System.out.println("Your computer is added");
 		}
 	}
 	
@@ -222,274 +241,67 @@ public class UserInterface {
 	public void updateComputerInformations() {
 		System.out.println("Please enter the number of the computer you want to update.");
 		
-		// On selectionne l'ordinateur en question
-		long computerId = -1;
-		do {
-			String str = scanner.nextLine();
-			try {
-				computerId = Long.parseLong(str);
-				if (computerId < 0) {
-					System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the computer you want to update.");
-				}
-				else {
-					// Si computerId est incorrect alors, on recommence
-					if (!computerService.isCorrectId(computerId)) {
-						computerId = -1;
-						System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the computer you want to update.");
-					}
-				}
-			}
-			catch (NumberFormatException e) {
-				System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the computer.");
-			}
-		} while (computerId < 0);
+		Optional<Computer> computer = inputManager.askComputer();
 		
-		Computer computer = computerService.getComputerById(computerId);
-		long currentId = computer.getId();
-		String currentName = computer.getName();
-		LocalDate currentIntroducedDate = computer.getIntroducedDate();
-		LocalDate currentDiscontinuedDate = computer.getDiscontinuedDate();
-		long currentCompanyId = computer.getCompany().getId();
+		Computer currentComputer = computer.get();
+		long currentId = currentComputer.getId();
+		String currentName = currentComputer.getName();
+		Optional<LocalDate> currentIntroducedDate = currentComputer.getIntroducedDate();
+		Optional<LocalDate> currentDiscontinuedDate = currentComputer.getDiscontinuedDate();
+		Optional<Company> currentCompany = currentComputer.getCompany();
 		
 		// Computer name
-		System.out.println("The name of the computer is " + computer.getName());
-		System.out.println("Do you want to change this name? Enter yes or no.");
-		int resultName = -1;
-		do {
-			String str = scanner.nextLine();
-			switch (str.trim()) {
-				case "yes":
-					resultName = 1;
-	                break;
-	        	case "no":
-	        		resultName = 0;
-	        		break;
-	        	default:
-	        		System.out.println("Sorry, do you want to change this name? Enter yes or no.");
-	        		resultName = -1;
-	        		break;
-			}
-		} while(resultName < 0);
-		String computerName = null;
-		if (resultName == 1) {
-			// On lui demande le nouveau nom
-        	System.out.println("Please now enter the name of your computer.");
-    		do {
-    			computerName = scanner.nextLine();
-    			if (computerName.trim().equals("")) {
-    				System.out.println("Please, enter a correct name");
-    			}
-    		} while (computerName.trim().equals(""));
-    		currentName = computerName.trim();
+		System.out.println("The name of the computer is " + currentName);
+		YesOrNoEnum changeName = inputManager.getYesOrNo("Do you want to change this name? Enter yes or no.");
+		if (changeName == YesOrNoEnum.YES) {
+			System.out.println("Please enter the new name of the computer.");
+			currentName = inputManager.askComputerName();
 		}
 		
 		// Introduced date
-		System.out.println("The introduced date of your computer is " + computer.getIntroducedDate());
-		System.out.println("Do you want to change this date? Enter yes or no.");
-		int result = -1;
-		do {
-			String str = scanner.nextLine();
-			switch (str.trim()) {
-				case "yes":
-	        		result = 1;
-	                break;
-	        	case "no":
-	        		result = 0;
-	        		break;
-	        	default:
-	        		System.out.println("Sorry, do you want to change this date? Enter yes or no.");
-	        		result = -1;
-	        		break;
-			}
-		} while(result < 0);
-        if (result == 1) {
-        	// On lui demande la nouvelle date
-        	System.out.println("Please now enter the introduced date with the format dd/MM/yyyy.");
-    		LocalDate introducedDate = null;
-    		String strIntroducedDate = null;
-    		do {
-    			strIntroducedDate = scanner.nextLine();
-    			try {
-    				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    				introducedDate = LocalDate.parse(strIntroducedDate, formatter);
-    			}
-    			catch (DateTimeParseException e) {
-    				if (!strIntroducedDate.equals("null")) {
-    					System.out.println("This is an incorrect date. Please enter the introduced date with the format dd/MM/yyyy.");
-    				}
-    			}
-    		} while (introducedDate == null);
-    		currentIntroducedDate = introducedDate;
-        }
-        
+		System.out.println("The introduced date of the computer is " + currentIntroducedDate);
+		YesOrNoEnum changeIntroducedDate = inputManager.getYesOrNo("Do you want to change this introduced date? Enter yes or no.");
+		if (changeIntroducedDate == YesOrNoEnum.YES) {
+			System.out.println("Please enter the new introduced date of the computer.");
+			currentIntroducedDate = inputManager.askDate();
+		}
+		
 		// Discontinued date
-		System.out.println("The discontinued date of your computer is " + computer.getDiscontinuedDate());
-		System.out.println("Do you want to change this date? Enter yes or no.");
-		int changeDiscontinuedDate = -1;
-		do {
-			String str = scanner.nextLine();
-			switch (str.trim()) {
-				case "yes":
-					changeDiscontinuedDate = 1;
-	                break;
-	        	case "no":
-	        		changeDiscontinuedDate = 0;
-	        		break;
-	        	default:
-	        		System.out.println("Sorry, do you want to change this date? Enter yes or no.");
-	        		changeDiscontinuedDate = -1;
-	        		break;
-			}
-		} while(changeDiscontinuedDate < 0);
-        if (changeDiscontinuedDate == 1) {
-        	// On lui demande la nouvelle date
-        	System.out.println("Please now enter the discontinued date with the format dd/MM/yyyy.");
-    		LocalDate discontinuedDate = null;
-    		String strDiscontinuedDate = null;
-    		do {
-    			strDiscontinuedDate = scanner.nextLine();
-    			try {
-    				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    				discontinuedDate = LocalDate.parse(strDiscontinuedDate, formatter);
-    			}
-    			catch (DateTimeParseException e) {
-    				if (!strDiscontinuedDate.equals("null")) {
-    					System.out.println("This is an incorrect date. Please enter the discontinued date with the format dd/MM/yyyy.");
-    				}
-    			}
-
-    		} while (discontinuedDate == null);
-    		currentDiscontinuedDate = discontinuedDate;
-        }
-        
-        // Company id
-        System.out.println("The company id of your computer is " + computer.getCompany().getId());
-		System.out.println("Do you want to change this number? Enter yes or no.");
-		int changeCompanyId = -1;
-		do {
-			String str = scanner.nextLine();
-			switch (str.trim()) {
-				case "yes":
-					changeCompanyId = 1;
-	                break;
-	        	case "no":
-	        		changeCompanyId = 0;
-	        		break;
-	        	default:
-	        		System.out.println("Sorry, do you want to change the company id? Enter yes or no.");
-	        		changeCompanyId = -1;
-	        		break;
-			}
-		} while(changeCompanyId < 0);
-		if (changeCompanyId == 1) {
-			// On lui demande le nouvelle Id d'entreprise
-			System.out.println("Please now enter the company identifiant of your computer.");
-			int companyId = -1;
-			String strCompanyId = null;
-			do {
-				strCompanyId = scanner.nextLine();
-				try {
-					companyId = Integer.parseInt(strCompanyId);
-					if (companyId < 0) {
-						System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the company of your computer. (If you don't want to enter this identifiant, please enter null)");
-					}
-					// Si companyId est incorrect alors, on recommence
-					if (!companyService.isCorrectId(companyId)) {
-						companyId = -1;
-						System.out.println("This number doesn't correspond to a company. Please, enter the number of the identifiant of the company of your computer. (If you don't want to enter this identifiant, please enter null)");
-					}
-				}
-				catch (NumberFormatException e) {
-					System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the company of the computer.");
-				}
-			} while (companyId < 0);
-			currentCompanyId = companyId;
+		System.out.println("The discontinued date of the computer is " + currentDiscontinuedDate);
+		YesOrNoEnum changeDiscontinuedDate = inputManager.getYesOrNo("Do you want to change this discontinued date? Enter yes or no.");
+		if (changeDiscontinuedDate == YesOrNoEnum.YES) {
+			System.out.println("Please enter the new discontinued date of the computer.");
+			currentDiscontinuedDate = inputManager.askDate();
 		}
 		
-		Computer updatedComputer = new Computer(currentId, currentName, currentIntroducedDate, currentDiscontinuedDate, companyService.getCompanyById(currentCompanyId));
-		
-		
-		int success = computerService.updateComputerById(updatedComputer);
-		if (success == 1) {
-			System.out.println("Computer number " + currentId + " is now update");
+		// Company
+		System.out.println("The company of the company is " + currentCompany);
+		YesOrNoEnum changeCompanyId = inputManager.getYesOrNo("Do you want to change this company? Enter yes or no.");
+		if (changeCompanyId == YesOrNoEnum.YES) {
+			System.out.println("Please enter the new company identifier of the computer.");
+			currentCompany = inputManager.askCompany();
 		}
-		else {
-			System.out.println(currentName);
-			System.out.println(currentCompanyId);
-			System.out.println("Careful");
-		}
-	
-	}
-	
-	/**
-	 * deletes a computer
-	 */
-	public void deleteComputer() {
-		System.out.println("Please enter the number of the computer you want to delete.");
 		
-		// On selectionne l'ordinateur en question
-		int computerId = -1;
-		do {
-			String str = scanner.nextLine();
-			try {
-				computerId = Integer.parseInt(str);
-				if (computerId < 0) {
-					System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the computer you want to delete.");
-				}
-				else {
-					// Si companyId est incorrect alors, on recommence
-					if (!computerService.isCorrectId(computerId)) {
-						computerId = -1;
-						System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the computer you want to delete.");
-					}
-				}
-			}
-			catch (NumberFormatException e) {
-				System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the computer.");
-			}
-		} while (computerId < 0);
-		
-		System.out.println("You have selected the computer number " + computerId);
-		System.out.println("Are you sure you want to delete this computer?");
-		int deleteComputer = -1;
-		do {
-			String str = scanner.nextLine();
-			switch (str.trim()) {
-				case "yes":
-					deleteComputer = 1;
-	                break;
-	        	case "no":
-	        		deleteComputer = 0;
-	        		break;
-	        	default:
-	        		System.out.println("Sorry, do you want to delete the computer? Enter yes or no.");
-	        		deleteComputer = -1;
-	        		break;
-			}
-		} while(deleteComputer < 0);
-		if (deleteComputer == 1) {
-			int success = computerService.deleteComputerById(computerId);
-			if (success == 1) {
-				System.out.println("Computer number " + computerId + " is now deleted");
+		Computer updatedComputer = new Computer(currentId, currentName, currentIntroducedDate, currentDiscontinuedDate, currentCompany);
+		boolean success;
+		try {
+			success = computerService.updateComputerById(updatedComputer);
+			if (success) {
+				System.out.println("Computer number " + currentId + " is now update");
 			}
 			else {
 				System.out.println("Careful");
 			}
-		}
+		} catch (DatabaseException e) {
+			System.out.println(e.getMessage());
+		}	
 	}
-	
+
 	/**
 	 * close the application
 	 */
 	public static void closeApplication() {
 		System.out.println("See yaa!");
 	}
-	
-	/**
-	 * informs the user that is enter is invalid
-	 */
-	public static void enterInvalid() {
-		System.out.println("Incorrect Enter. Please enter a number between 1 and 7.");
-	}
-	
+
 }

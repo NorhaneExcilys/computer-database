@@ -6,7 +6,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import exception.DatabaseException;
+import exception.UnknowCompanyException;
 import model.Company;
 
 /**
@@ -28,8 +31,7 @@ public class CompanyDAO {
 	private DAO dao;
 	
 	/**
-	 * builds CompanyDAO defined by dao
-	 * @param dao the dao
+	 * builds CompanyDAO
 	 */
 	private CompanyDAO() {
 		this.dao = DAO.getInstance();
@@ -37,7 +39,6 @@ public class CompanyDAO {
 
 	/**
 	 * builds companyDAO if it isn't created or return the actual companyDAO
-	 * @param dao the dao
 	 * @return the actual companyDAO
 	 */
 	public static CompanyDAO getInstance() {
@@ -50,11 +51,9 @@ public class CompanyDAO {
 	/**
 	 * return the list of all companies in the database company
 	 * @return the list of all companies
+	 * @throws DatabaseException 
 	 */
-	public List<Company> getAll() {
-		
-		// TODO Return optional
-		
+	public List<Company> getAll() throws DatabaseException {
 		List<Company> allCompanies = new ArrayList<Company>();
 		
 		try (Connection connection = dao.getConnection()) {
@@ -67,6 +66,7 @@ public class CompanyDAO {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			throw new DatabaseException(e.getMessage());
 		}
 		
 		return allCompanies;
@@ -76,12 +76,11 @@ public class CompanyDAO {
 	 * return the company chosen by identifier
 	 * @param id the identifier of the company
 	 * @return the company chosen by identifier
+	 * @throws DatabaseException 
+	 * @throws UnknowCompanyException 
 	 */
-	public Company getById(long id) {
-		
-		// TODO Return optional
-		
-		Company company = null;
+	public Optional<Company> getById(long id) throws DatabaseException, UnknowCompanyException {
+		Optional<Company> company = Optional.empty();
 		
 		try (Connection connection = dao.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
@@ -90,36 +89,17 @@ public class CompanyDAO {
 			if(queryResult.next()) {
 				int currentId = queryResult.getInt("id");
 				String currentName = queryResult.getString("name");
-				company = new Company(currentId, currentName);
+				company = Optional.of(new Company(currentId, currentName));
+			}
+			else {
+				throw new UnknowCompanyException();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			throw new DatabaseException(e.getMessage());
 		}
-		
+
 		return company;
-	}
-	
-	/**
-	 * Return true if the id of the company is correct and false if not
-	 * @param id the identifier of the company
-	 * @return true if the identifier of the company is correct and false if not
-	 */
-	public boolean isCorrectId(long id) {
-		
-		// TODO Return optional
-		
-		try (Connection connection = dao.getConnection()) {
-			PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
-			preparedStatement.setLong(1, id); 
-			ResultSet queryResult = preparedStatement.executeQuery();
-			if (!queryResult.next()) {
-				return false;
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		return true;
 	}
 	
 }

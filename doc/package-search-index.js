@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"model"},{"l":"service"},{"l":"ui"}]
+packageSearchIndex = [{"l":"exception"},{"l":"model"},{"l":"persistance"},{"l":"service"},{"l":"ui"}]

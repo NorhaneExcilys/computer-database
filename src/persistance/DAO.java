@@ -9,6 +9,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import exception.DatabaseException;
+
 /**
  * <b>DAO is the class that enable a connection to a database thanks to JDBC.</b>
  * A DAO is characterized by the following informations:
@@ -43,13 +45,15 @@ public class DAO {
 	/**
 	 * Returns a new connection to the database
 	 * @return a new connection to the database
+	 * @throws DatabaseException 
 	 */
-	public Connection getConnection() {
+	public Connection getConnection() throws DatabaseException {
 		Connection connection = null;
 		try {
 			connection = DriverManager.getConnection(database, dbuser, dbpassword);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			throw new DatabaseException(e.getMessage());
 		}
 		return connection;
 	}

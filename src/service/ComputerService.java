@@ -1,7 +1,11 @@
 package service;
 
 import java.util.List;
+import java.util.Optional;
 
+import exception.DatabaseException;
+import exception.UnknowCompanyException;
+import exception.UnknowComputerException;
 import model.Computer;
 import persistance.ComputerDAO;
 
@@ -22,27 +26,23 @@ public class ComputerService {
 		return computerService;
 	}
 	
-	public List<Computer> getComputers() {
+	public List<Computer> getComputers() throws DatabaseException, UnknowCompanyException {
 		return computerDAO.getAll();
 	}
 	
-	public Computer getComputerById(long id) {
+	public Optional<Computer> getById(long id) throws DatabaseException, UnknowComputerException, UnknowCompanyException {
 		return computerDAO.getById(id);
 	}
-
-	public boolean isCorrectId(long id) {
-		return computerDAO.isCorrectId(id);
-	}
 	
-	public int updateComputerById(Computer computer) {
+	public boolean updateComputerById(Computer computer) throws DatabaseException {
 		return computerDAO.updateComputerById(computer);
 	}
 	
-	public int deleteComputerById(int id) {
+	public boolean deleteComputerById(int id) throws DatabaseException, UnknowComputerException {
 		return computerDAO.deleteComputerById(id);
 	}
 	
-	public int addComputer(Computer computer) {
+	public boolean addComputer(Computer computer) throws DatabaseException {
 		return computerDAO.addComputer(computer);
 	}
 	
