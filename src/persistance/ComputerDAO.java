@@ -29,6 +29,7 @@ import model.Computer;
  */
 public class ComputerDAO {
 	
+	private final static String GET_COUNT = "SELECT COUNT(id) AS count FROM computer";
 	private final static String GET_ALL = "SELECT id, name, introduced, discontinued, company_id  FROM computer;";
 	private final static String GET_BY_ID = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE id = ?;";
 	private final static String ADD = "INSERT INTO computer (name, introduced, discontinued, company_id) VALUE (?, ?, ?, ?);";
@@ -57,6 +58,25 @@ public class ComputerDAO {
 			computerDAO = new ComputerDAO();
 		}
 		return computerDAO;
+	}
+	
+	/**
+	 * return the number of computer in the database computer
+	 * @return the number of computer in the database computer
+	 * @throws DatabaseException
+	 */
+	public int getCount() throws DatabaseException {
+		int computerNumber = -1;
+		try (Connection connection = dao.getConnection()) {
+			ResultSet queryResult = connection.createStatement().executeQuery(GET_COUNT);
+			while (queryResult.next()) {
+				computerNumber = queryResult.getInt("count");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new DatabaseException(e.getMessage());
+		}
+		return computerNumber;
 	}
 	
 	/**

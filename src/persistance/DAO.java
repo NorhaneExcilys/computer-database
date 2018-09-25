@@ -74,6 +74,7 @@ public class DAO {
 	 */
 	public void fillDbProperties() {
 		Properties properties = new Properties();
+
 		try (InputStream input = new FileInputStream("config.properties")) {
 			properties.load(input);
 			database = properties.getProperty("database");

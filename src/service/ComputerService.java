@@ -26,6 +26,10 @@ public class ComputerService {
 		return computerService;
 	}
 	
+	public int getCount() throws DatabaseException {
+		return computerDAO.getCount();
+	}
+	
 	public List<Computer> getComputers() throws DatabaseException, UnknowCompanyException {
 		return computerDAO.getAll();
 	}
