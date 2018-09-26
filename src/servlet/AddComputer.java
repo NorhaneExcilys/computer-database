@@ -34,15 +34,12 @@ public class AddComputer extends HttpServlet {
 	}
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
 		List<Company> companies = new ArrayList<Company>();
 		try {
 			companies = companyService.getCompanies();
 		} catch (DatabaseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 		request.setAttribute("companies", companies);
 		
 		request.getRequestDispatcher("/WEB-INF/views/addComputer.jsp").forward(request,response);

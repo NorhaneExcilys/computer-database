@@ -44,14 +44,8 @@
         </form>
 
         <div class="container" style="margin-top: 10px;">
-
-
-
-
             <table class="table table-striped table-bordered">
                 <thead>
-					
-		
                     <tr>
                         <!-- Variable declarations for passing labels as parameters -->
                         <!-- Table header for Computer Name -->
@@ -90,7 +84,7 @@
 	                            <input type="checkbox" name="cb" class="cb" value="0">
 	                        </td>
 	                        <td>
-	                            <a href="EditComputer" onclick="">${computer.name}</a>
+	                            <a href="EditComputer?id=${computer.id}" onclick="">${computer.name}</a>
 	                        </td>
 	                        <td>${computer.introducedDate}</td>
 	                        <td>${computer.discontinuedDate}</td>

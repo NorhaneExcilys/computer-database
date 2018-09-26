@@ -31,6 +31,7 @@ public class ComputerDAO {
 	
 	private final static String GET_COUNT = "SELECT COUNT(id) AS count FROM computer";
 	private final static String GET_ALL = "SELECT id, name, introduced, discontinued, company_id  FROM computer;";
+	private final static String GET_BY_PAGE = "SELECT id, name, introduced, discontinued, company_id FROM computer LIMIT ? OFFSET ?;";
 	private final static String GET_BY_ID = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE id = ?;";
 	private final static String ADD = "INSERT INTO computer (name, introduced, discontinued, company_id) VALUE (?, ?, ?, ?);";
 	private final static String UPDATE = "UPDATE computer SET name = ?, introduced = ?, discontinued = ?, company_id = ? WHERE id = ?;";
@@ -77,6 +78,37 @@ public class ComputerDAO {
 			throw new DatabaseException(e.getMessage());
 		}
 		return computerNumber;
+	}
+	
+	/**
+	 * return the list of computer for a given page
+	 * @param computerNumber the number of computer per page
+	 * @param pageNumber the actual page
+	 * @return the list of the computer for a given page
+	 * @throws DatabaseException
+	 * @throws UnknowCompanyException
+	 */
+	public List<Computer> getByPage(int computerNumber, int pageNumber) throws DatabaseException, UnknowCompanyException {
+		List<Computer> computers = new ArrayList<Computer>();
+		try (Connection connection = dao.getConnection()) {
+			PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_PAGE);
+			preparedStatement.setLong(1, computerNumber);
+			preparedStatement.setInt(2, computerNumber * (pageNumber-1));
+			ResultSet queryResult = preparedStatement.executeQuery();
+			while (queryResult.next()) {
+				int currentId = queryResult.getInt("id");
+				String currentName = queryResult.getString("name");
+				Optional<LocalDate> introducedDate = stringToLocalDate(queryResult.getString("introduced"));
+				Optional<LocalDate> discontinuedDate = stringToLocalDate(queryResult.getString("discontinued"));
+				long currentCompanyId = queryResult.getLong("company_id");
+				Computer currentComputer = new Computer(currentId, currentName, introducedDate, discontinuedDate, currentCompanyId > 0 ? companyDAO.getById(currentCompanyId) : Optional.empty());
+				computers.add(currentComputer);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new DatabaseException(e.getMessage());
+		}
+		return computers;
 	}
 	
 	/**

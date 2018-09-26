@@ -1,5 +1,6 @@
 package persistance;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -74,8 +75,8 @@ public class DAO {
 	 */
 	public void fillDbProperties() {
 		Properties properties = new Properties();
-
-		try (InputStream input = new FileInputStream("config.properties")) {
+		
+		try (InputStream input = new FileInputStream("/home/elgharbi/eclipse-workspace/ComputerDatabase/config.properties")) {
 			properties.load(input);
 			database = properties.getProperty("database");
 			dbuser = properties.getProperty("dbuser");
