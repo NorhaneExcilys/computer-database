@@ -64,7 +64,7 @@ public class AddComputer extends HttpServlet {
 			e.printStackTrace();
 		}
 		
-		doGet(request, response);
+		request.getRequestDispatcher("Dashboard").forward(request,response);
 	}
 	
 	private Optional<LocalDate> stringToLocalDate(String strDate) {

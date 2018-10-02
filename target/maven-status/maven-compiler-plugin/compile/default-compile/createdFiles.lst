@@ -5,6 +5,7 @@ exception/UnknowYesOrNoException.class
 service/ComputerService.class
 persistance/DAO.class
 servlet/AddComputer.class
+dto/ComputerDTO.class
 ui/UserInterface$1.class
 ui/MenuEnum.class
 ui/Main.class
@@ -18,5 +19,6 @@ model/Computer.class
 exception/UnknowCompanyException.class
 exception/IncorrectNameException.class
 exception/UnknowComputerException.class
+servlet/DeleteComputer.class
 persistance/CompanyDAO.class
 service/CompanyService.class

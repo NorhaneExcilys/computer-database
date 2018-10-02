@@ -13,9 +13,11 @@
 /home/elgharbi/eclipse-workspace/ComputerDatabase/src/service/ComputerService.java
 /home/elgharbi/eclipse-workspace/ComputerDatabase/src/exception/UnknowMenuException.java
 /home/elgharbi/eclipse-workspace/ComputerDatabase/src/exception/UnknowYesOrNoException.java
+/home/elgharbi/eclipse-workspace/ComputerDatabase/src/servlet/DeleteComputer.java
 /home/elgharbi/eclipse-workspace/ComputerDatabase/src/servlet/AddComputer.java
 /home/elgharbi/eclipse-workspace/ComputerDatabase/src/exception/IncorrectNameException.java
 /home/elgharbi/eclipse-workspace/ComputerDatabase/src/ui/MenuEnum.java
 /home/elgharbi/eclipse-workspace/ComputerDatabase/src/persistance/ComputerDAO.java
 /home/elgharbi/eclipse-workspace/ComputerDatabase/src/ui/InputManager.java
 /home/elgharbi/eclipse-workspace/ComputerDatabase/src/servlet/EditComputer.java
+/home/elgharbi/eclipse-workspace/ComputerDatabase/src/dto/ComputerDTO.java

@@ -39,19 +39,13 @@
             </div>
         </div>
 
-        <form id="deleteForm" action="#" method="POST">
+        <form id="deleteForm" action="DeleteComputer" method="POST">
             <input type="hidden" name="selection" value="">
         </form>
 
         <div class="container" style="margin-top: 10px;">
-
-
-
-
             <table class="table table-striped table-bordered">
                 <thead>
-					
-		
                     <tr>
                         <!-- Variable declarations for passing labels as parameters -->
                         <!-- Table header for Computer Name -->
@@ -87,7 +81,7 @@
                 	<c:forEach items="${computers}" var="computer">
 						<tr>
 	                        <td class="editMode">
-	                            <input type="checkbox" name="cb" class="cb" value="0">
+	                            <input type="checkbox" name="cb" class="cb" value="${computer.id}">
 	                        </td>
 	                        <td>
 	                            <a href="EditComputer?id=${computer.id}" onclick="">${computer.name}</a>

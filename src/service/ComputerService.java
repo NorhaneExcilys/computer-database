@@ -34,6 +34,10 @@ public class ComputerService {
 		return computerDAO.getAll();
 	}
 	
+	public List<Computer> searchOnName(String name) throws DatabaseException, UnknowCompanyException {
+		return computerDAO.searchOnName(name);
+	}
+	
 	public List<Computer> getByPage(int computerNumber, int pageNumber) throws DatabaseException, UnknowCompanyException {
 		return computerDAO.getByPage(computerNumber, pageNumber);
 	}

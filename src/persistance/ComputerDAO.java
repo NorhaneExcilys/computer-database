@@ -33,6 +33,7 @@ public class ComputerDAO {
 	private final static String GET_ALL = "SELECT id, name, introduced, discontinued, company_id  FROM computer;";
 	private final static String GET_BY_PAGE = "SELECT id, name, introduced, discontinued, company_id FROM computer LIMIT ? OFFSET ?;";
 	private final static String GET_BY_ID = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE id = ?;";
+	private final static String SEARCH_ON_NAME = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE name LIKE '%?%'";
 	private final static String ADD = "INSERT INTO computer (name, introduced, discontinued, company_id) VALUE (?, ?, ?, ?);";
 	private final static String UPDATE = "UPDATE computer SET name = ?, introduced = ?, discontinued = ?, company_id = ? WHERE id = ?;";
 	private final static String DELETE = "DELETE FROM computer WHERE id = ?";
@@ -171,6 +172,35 @@ public class ComputerDAO {
 		}
 		
 		return computer;
+	}
+	
+	/**
+	 * 
+	 * @param name
+	 * @return
+	 * @throws DatabaseException
+	 * @throws UnknowCompanyException 
+	 */
+	public List<Computer> searchOnName(String name) throws DatabaseException, UnknowCompanyException {
+		List<Computer> result = new ArrayList<Computer>();
+		try (Connection connection = dao.getConnection()) {
+			PreparedStatement preparedStatement = connection.prepareStatement(SEARCH_ON_NAME);
+			preparedStatement.setString(1, name);
+			ResultSet queryResult = preparedStatement.executeQuery();
+			while (queryResult.next()) {
+				int currentId = queryResult.getInt("id");
+				String currentName = queryResult.getString("name");
+				Optional<LocalDate> introducedDate = stringToLocalDate(queryResult.getString("introduced"));
+				Optional<LocalDate> discontinuedDate = stringToLocalDate(queryResult.getString("discontinued"));
+				long currentCompanyId = queryResult.getLong("company_id");
+				Computer currentComputer = new Computer(currentId, currentName, introducedDate, discontinuedDate, currentCompanyId > 0 ? companyDAO.getById(currentCompanyId) : Optional.empty());
+				result.add(currentComputer);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new DatabaseException(e.getMessage());
+		}
+		return result;
 	}
 	
 	/**

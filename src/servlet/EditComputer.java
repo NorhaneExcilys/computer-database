@@ -124,7 +124,7 @@ public class EditComputer extends HttpServlet {
 			e.printStackTrace();
 		}
 		
-		doGet(request, response);
+		request.getRequestDispatcher("Dashboard").forward(request,response);
 	}
 	
 	private String localDateToString(Optional<LocalDate> date) {
