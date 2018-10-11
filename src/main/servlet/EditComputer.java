@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import exception.DatabaseException;
 import exception.UnknowCompanyException;
 import exception.UnknowComputerException;
+import mapper.DateMapper;
 import model.Company;
 import model.Computer;
 import service.CompanyService;
@@ -31,6 +32,7 @@ public class EditComputer extends HttpServlet {
 	
 	private ComputerService computerService;
 	private CompanyService companyService;
+	private DateMapper dateMapper;
 	
 	private long id;
 	private String name;
@@ -43,6 +45,7 @@ public class EditComputer extends HttpServlet {
 		super();
 		computerService = ComputerService.getInstance();
 		companyService = CompanyService.getInstance();
+		dateMapper = DateMapper.getInstance();
 		
 		id = -1;
 		name = "";
@@ -90,8 +93,8 @@ public class EditComputer extends HttpServlet {
 
 		request.setAttribute("id", id);
 		request.setAttribute("name", name);
-		request.setAttribute("introduced", localDateToString(introducedDate));
-		request.setAttribute("discontinued", localDateToString(discontinuedDate));
+		request.setAttribute("introduced", dateMapper.localDateToString(introducedDate, "yyyy-MM-dd"));
+		request.setAttribute("discontinued", dateMapper.localDateToString(discontinuedDate, "yyyy-MM-dd"));
 		request.setAttribute("companyId", companyId);
 		request.setAttribute("companies", companies);
 
@@ -100,8 +103,8 @@ public class EditComputer extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		name = request.getParameter("name");
-		introducedDate = stringToLocalDate(request.getParameter("introduced"));
-		discontinuedDate = stringToLocalDate(request.getParameter("discontinued"));
+		introducedDate = dateMapper.stringToLocalDate(request.getParameter("introduced"), "yyyy-MM-dd");
+		discontinuedDate = dateMapper.stringToLocalDate(request.getParameter("discontinued"), "yyyy-MM-dd");
 		if (request.getParameter("companyId") == null) {
 			company = Optional.empty();
 		}
@@ -117,39 +120,26 @@ public class EditComputer extends HttpServlet {
 			}
 		}
 		
-		Computer computer = new Computer(id, name, introducedDate, discontinuedDate, company);
+		Computer computer = new Computer.ComputerBuilder(name).id(id).introducedDate(introducedDate).discontinuedDate(discontinuedDate).company(company).build();
+		boolean computerUpadated = false;
 		try {
-			computerService.updateComputerById(computer);
+			computerUpadated = computerService.updateComputerById(computer);
 		} catch (DatabaseException e) {
+			e.printStackTrace();
+		} catch (UnknowComputerException e) {
 			e.printStackTrace();
 		}
 		
-		doGet(request, response);
+		if (computerUpadated) {
+			response.sendRedirect("Dashboard");
+		}
+		else {
+			doGet(request, response);			
+		}
+
 	}
 	
-	private String localDateToString(Optional<LocalDate> date) {
-		String strDate = "";
-		if (date.isPresent()) {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-			strDate = date.get().format(formatter);
-		}
-		return strDate;
-	}
 	
-	private Optional<LocalDate> stringToLocalDate(String strDate) {
-		Optional<LocalDate> date = Optional.empty();
-		if (!strDate.equals("")) {
-			try {
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-				date = Optional.of(LocalDate.parse(strDate, formatter));
-			}
-			catch (DateTimeParseException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		return date;
-	}
 
 
 }

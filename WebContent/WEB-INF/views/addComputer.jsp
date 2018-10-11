@@ -26,7 +26,7 @@
                         <fieldset>
                             <div class="form-group">
                                 <label for="computerName">Computer name</label>
-                                <input type="text" class="form-control" id="computerName" name="computerName" placeholder="Computer name">
+                                <input type="text" class="form-control" id="computerName" name="computerName" placeholder="Computer name" required="required">
                             </div>
                             <div class="form-group">
                                 <label for="introduced">Introduced date</label>
@@ -39,6 +39,7 @@
                             <div class="form-group">
                                 <label for="companyId">Company</label>
                                 <select class="form-control" id="companyId" name="companyId" >
+                                	<option disabled selected> -- select a company -- </option>
                                 	<c:forEach items="${companies}" var="company">
                                     	<option value="${company.id}">${company.name}</option>
                                 	</c:forEach>

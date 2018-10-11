@@ -32,11 +32,12 @@ public class Computer {
 	 * @param discontinuedDate the discontinued date of the computer
 	 * @param company the company of the computer
 	 */
-	public Computer(String name, Optional<LocalDate> introducedDate, Optional<LocalDate> discontinuedDate, Optional<Company> company) {
-		this.name = name;
-		this.introducedDate = introducedDate;
-		this.discontinuedDate = discontinuedDate;
-		this.company = company;
+	private Computer(ComputerBuilder computerBuilder) {
+		this.id = computerBuilder.id;
+		this.name = computerBuilder.name;
+		this.introducedDate = computerBuilder.introducedDate;
+		this.discontinuedDate = computerBuilder.discontinuedDate;
+		this.company = computerBuilder.company;
 	}
 	
 	/**
@@ -47,13 +48,13 @@ public class Computer {
 	 * @param discontinuedDate the discontinued date of the computer
 	 * @param company the company of the computer
 	 */
-	public Computer(long id, String name, Optional<LocalDate> introducedDate, Optional<LocalDate> discontinuedDate, Optional<Company> company) {
+	/*public Computer(long id, String name, Optional<LocalDate> introducedDate, Optional<LocalDate> discontinuedDate, Optional<Company> company) {
 		this.id = id;
 		this.name = name;
 		this.introducedDate = introducedDate;
 		this.discontinuedDate = discontinuedDate;
 		this.company = company;
-	}
+	}*/
 	
 	public long getId() {
 		return id;
@@ -63,38 +64,81 @@ public class Computer {
 		return name;
 	}
 	
-	public void setName(String name) {
+	/*public void setName(String name) {
 		this.name = name;
-	}
+	}*/
 	
 	public Optional<LocalDate> getIntroducedDate() {
 		return introducedDate;
 	}
 	
-	public void setIntroducedDate(Optional<LocalDate> introducedDate) {
+	/*public void setIntroducedDate(Optional<LocalDate> introducedDate) {
 		this.introducedDate = introducedDate;
-	}
+	}*/
 	
 	public Optional<LocalDate> getDiscontinuedDate() {
 		return discontinuedDate;
 	}
 	
-	public void setDiscontinuedDate(Optional<LocalDate> discontinuedDate) {
+	/*public void setDiscontinuedDate(Optional<LocalDate> discontinuedDate) {
 		this.discontinuedDate = discontinuedDate;
-	}
+	}*/
 	
 	public Optional<Company> getCompany() {
 		return company;
 	}
 
-	public void setCompany(Optional<Company> company) {
+	/*public void setCompany(Optional<Company> company) {
 		this.company = company;
-	}
+	}*/
 	
     @Override
 	public String toString() {
 		return "Computer [id=" + id + ", name=" + name + ", introducedDate=" + introducedDate + ", discontinuedDate="
 				+ discontinuedDate + ", company=" + company + "]";
 	}
+    
+    
+    
+    public static class ComputerBuilder {
+    	private long id;
+    	private String name;
+    	private Optional<LocalDate> introducedDate;
+    	private Optional<LocalDate> discontinuedDate;
+    	private Optional<Company> company;
+    	
+    	public ComputerBuilder (String name) {
+    		this.name = name;
+    	}
+    	
+    	public ComputerBuilder id (long id) {
+    		this.id = id;
+    		return this;
+    	}
+    	
+    	public ComputerBuilder name (String name) {
+    		this.name = name;
+    		return this;
+    	}
+    	
+    	public ComputerBuilder introducedDate (Optional<LocalDate> introducedDate) {
+    		this.introducedDate = introducedDate;
+    		return this;
+    	}
+    	
+    	public ComputerBuilder discontinuedDate (Optional<LocalDate> discontinuedDate) {
+    		this.discontinuedDate = discontinuedDate;
+    		return this;
+    	}
+    	
+    	public ComputerBuilder company (Optional<Company> company) {
+    		this.company = company;
+    		return this;
+    	}
+    	
+    	public Computer build() {
+    		return new Computer(this);
+    	}
+    }
 
 }

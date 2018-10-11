@@ -10,11 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import exception.DatabaseException;
 import exception.UnknowCompanyException;
 import exception.UnknowComputerException;
 import model.Company;
 import model.Computer;
+import model.Paging;
 
 /**
  * <b>DAOComputer is the class that enables to performs action on the database computer.</b>
@@ -30,28 +34,27 @@ import model.Computer;
 public class ComputerDAO {
 	
 	private final static String GET_COUNT = "SELECT COUNT(id) AS count FROM computer";
+	private final static String GET_COUNT_BY_SEARCHED_WORD = "SELECT COUNT(id) AS count FROM computer WHERE name LIKE ?;";	
 	private final static String GET_ALL = "SELECT id, name, introduced, discontinued, company_id  FROM computer;";
 	private final static String GET_BY_PAGE = "SELECT id, name, introduced, discontinued, company_id FROM computer LIMIT ? OFFSET ?;";
 	private final static String GET_BY_ID = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE id = ?;";
+	private final static String GET_BY_SEARCHED_WORD = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE name LIKE ?;";
 	private final static String ADD = "INSERT INTO computer (name, introduced, discontinued, company_id) VALUE (?, ?, ?, ?);";
 	private final static String UPDATE = "UPDATE computer SET name = ?, introduced = ?, discontinued = ?, company_id = ? WHERE id = ?;";
 	private final static String DELETE = "DELETE FROM computer WHERE id = ?";
+	private final static String DELETE_BY_LIST = "DELETE FROM computer WHERE id IN (%s)";
 	
 	private static ComputerDAO computerDAO;
-
 	private CompanyDAO companyDAO;
-	private DAO dao;
+	private ConnectionDAO connectionDAO;
 	
-	/**
-	 * builds DAOComputer
-	 */
 	private ComputerDAO() {
-		this.dao = DAO.getInstance();
+		this.connectionDAO = connectionDAO.getInstance();
 		this.companyDAO = CompanyDAO.getInstance();
 	}
 	
 	/**
-	 * builds DAOComputer if it isn't created or return the actual daoComputer
+	 * builds ComputerDAO if it isn't created or return the actual computerDAO
 	 * @return the actual computerDAO
 	 */
 	public static ComputerDAO getInstance() {
@@ -68,45 +71,63 @@ public class ComputerDAO {
 	 */
 	public int getCount() throws DatabaseException {
 		int computerNumber = -1;
-		try (Connection connection = dao.getConnection()) {
+		try (Connection connection = connectionDAO.getConnection()) {
 			ResultSet queryResult = connection.createStatement().executeQuery(GET_COUNT);
 			while (queryResult.next()) {
 				computerNumber = queryResult.getInt("count");
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new DatabaseException(e.getMessage());
+			throw new DatabaseException("Impossible to count the number of computer" + e.getMessage());
+		}
+		return computerNumber;
+	}
+	
+	/**
+	 * return the number of computer in the database computer filter by name
+	 * @param word the filter of name
+	 * @return the number of computer in the database computer filter by name
+	 * @throws DatabaseException
+	 */
+	public int getCountBySearchedWord(String word) throws DatabaseException {
+		int computerNumber = -1;
+		try (Connection connection = connectionDAO.getConnection()) {
+			PreparedStatement preparedStatement = connection.prepareStatement(GET_COUNT_BY_SEARCHED_WORD);
+			preparedStatement.setString(1, "%" + word + "%");
+			ResultSet queryResult = preparedStatement.executeQuery();
+			while (queryResult.next()) {
+				computerNumber = queryResult.getInt("count");
+			}
+		} catch (SQLException e) {
+			throw new DatabaseException("Impossible to count the number of computer by filter name" + e.getMessage());
 		}
 		return computerNumber;
 	}
 	
 	/**
 	 * return the list of computer for a given page
-	 * @param computerNumber the number of computer per page
-	 * @param pageNumber the actual page
+	 * @param paging the actual paging
 	 * @return the list of the computer for a given page
 	 * @throws DatabaseException
 	 * @throws UnknowCompanyException
 	 */
-	public List<Computer> getByPage(int computerNumber, int pageNumber) throws DatabaseException, UnknowCompanyException {
+	public List<Computer> getByPage(Paging paging) throws DatabaseException, UnknowCompanyException {
 		List<Computer> computers = new ArrayList<Computer>();
-		try (Connection connection = dao.getConnection()) {
+		try (Connection connection = connectionDAO.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_PAGE);
-			preparedStatement.setLong(1, computerNumber);
-			preparedStatement.setInt(2, computerNumber * (pageNumber-1));
+			preparedStatement.setLong(1, paging.getComputersPerPage());
+			preparedStatement.setInt(2, paging.getComputersPerPage() * (paging.getCurrentPage()-1));
 			ResultSet queryResult = preparedStatement.executeQuery();
 			while (queryResult.next()) {
 				int currentId = queryResult.getInt("id");
 				String currentName = queryResult.getString("name");
-				Optional<LocalDate> introducedDate = stringToLocalDate(queryResult.getString("introduced"));
-				Optional<LocalDate> discontinuedDate = stringToLocalDate(queryResult.getString("discontinued"));
+				Optional<LocalDate> introducedDate = sqlDateToLocalDate(queryResult, "introduced");
+				Optional<LocalDate> discontinuedDate = sqlDateToLocalDate(queryResult, "discontinued");
 				long currentCompanyId = queryResult.getLong("company_id");
-				Computer currentComputer = new Computer(currentId, currentName, introducedDate, discontinuedDate, currentCompanyId > 0 ? companyDAO.getById(currentCompanyId) : Optional.empty());
+				Computer currentComputer = new Computer.ComputerBuilder(currentName).id(currentId).introducedDate(introducedDate).discontinuedDate(discontinuedDate).company(currentCompanyId > 0 ? companyDAO.getById(currentCompanyId) : Optional.empty()).build();
 				computers.add(currentComputer);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new DatabaseException(e.getMessage());
+			throw new DatabaseException("Impossible to get computers by page" + e.getMessage());
 		}
 		return computers;
 	}
@@ -120,20 +141,19 @@ public class ComputerDAO {
 	public List<Computer> getAll() throws DatabaseException, UnknowCompanyException {
 		List<Computer> allComputers = new ArrayList<Computer>();
 		
-		try (Connection connection = dao.getConnection()) {
+		try (Connection connection = connectionDAO.getConnection()) {
 			ResultSet queryResult = connection.createStatement().executeQuery(GET_ALL);
 			while (queryResult.next()) {
 				int currentId = queryResult.getInt("id");
 				String currentName = queryResult.getString("name");
-				Optional<LocalDate> introducedDate = stringToLocalDate(queryResult.getString("introduced"));
-				Optional<LocalDate> discontinuedDate = stringToLocalDate(queryResult.getString("discontinued"));
+				Optional<LocalDate> introducedDate = Optional.ofNullable(queryResult.getDate("introduced").toLocalDate());
+				Optional<LocalDate> discontinuedDate = Optional.ofNullable(queryResult.getDate("discontinued").toLocalDate());
 				long currentCompanyId = queryResult.getLong("company_id");
-				Computer currentComputer = new Computer(currentId, currentName, introducedDate, discontinuedDate, currentCompanyId > 0 ? companyDAO.getById(currentCompanyId) : Optional.empty());
+				Computer currentComputer = new Computer.ComputerBuilder(currentName).id(currentId).introducedDate(introducedDate).discontinuedDate(discontinuedDate).company(currentCompanyId > 0 ? companyDAO.getById(currentCompanyId) : Optional.empty()).build();
 				allComputers.add(currentComputer);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new DatabaseException(e.getMessage());
+			throw new DatabaseException("Impossible to get computers" + e.getMessage());
 		}
 
 		return allComputers;
@@ -150,27 +170,55 @@ public class ComputerDAO {
 	public Optional<Computer> getById(long id) throws DatabaseException, UnknowComputerException, UnknowCompanyException {
 		Optional<Computer> computer = Optional.empty();
 		
-		try (Connection connection = dao.getConnection()) {
+		try (Connection connection = connectionDAO.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
 			preparedStatement.setLong(1, id);
 			ResultSet queryResult = preparedStatement.executeQuery();
 			if(queryResult.next()) {
 				int currentId = queryResult.getInt("id");
 				String currentName = queryResult.getString("name");
-				Optional<LocalDate> introducedDate = stringToLocalDate(queryResult.getString("introduced"));
-				Optional<LocalDate> discontinuedDate = stringToLocalDate(queryResult.getString("discontinued"));
+				Optional<LocalDate> introducedDate = sqlDateToLocalDate(queryResult, "introduced");
+				Optional<LocalDate> discontinuedDate = sqlDateToLocalDate(queryResult, "discontinued");
 				int currentCompanyId = queryResult.getInt("company_id");
-				computer = Optional.of(new Computer(currentId, currentName, introducedDate, discontinuedDate, currentCompanyId > 0 ? companyDAO.getById(currentCompanyId) : Optional.empty()));
+				computer = Optional.of(new Computer.ComputerBuilder(currentName).id(currentId).introducedDate(introducedDate).discontinuedDate(discontinuedDate).company(currentCompanyId > 0 ? companyDAO.getById(currentCompanyId) : Optional.empty()).build());
 			}
 			else {
 				throw new UnknowComputerException();
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new DatabaseException(e.getMessage());
+			throw new DatabaseException("Impossible to get computer by id" + e.getMessage());
 		}
 		
 		return computer;
+	}
+	
+	/**
+	 * return the list of computer filter by name
+	 * @param word the filter of name
+	 * @return the list of computer filter by name
+	 * @throws DatabaseException
+	 * @throws UnknowCompanyException
+	 */
+	public List<Computer> getBySearchedWord(String word) throws DatabaseException, UnknowCompanyException {
+		List<Computer> searchedComputers = new ArrayList<Computer>();
+		
+		try (Connection connection = connectionDAO.getConnection()) {
+			PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_SEARCHED_WORD);
+			preparedStatement.setString(1, "%" + word + "%");
+			ResultSet queryResult = preparedStatement.executeQuery();
+			while (queryResult.next()) {
+				int currentId = queryResult.getInt("id");
+				String currentName = queryResult.getString("name");
+				Optional<LocalDate> introducedDate = sqlDateToLocalDate(queryResult, "introduced");
+				Optional<LocalDate> discontinuedDate = sqlDateToLocalDate(queryResult, "discontinued");
+				int currentCompanyId = queryResult.getInt("company_id");
+				searchedComputers.add(new Computer.ComputerBuilder(currentName).id(currentId).introducedDate(introducedDate).discontinuedDate(discontinuedDate).company(currentCompanyId > 0 ? companyDAO.getById(currentCompanyId) : Optional.empty()).build());
+			}
+		} catch (SQLException e) {
+			throw new DatabaseException("Impossible to get computers by searchedWord" + e.getMessage());
+		}
+		
+		return searchedComputers;
 	}
 	
 	/**
@@ -187,7 +235,7 @@ public class ComputerDAO {
 		
 		int queryResult = -1;
 		try {
-			Connection connection = dao.getConnection();
+			Connection connection = connectionDAO.getConnection();
 			PreparedStatement preparedStatement = connection.prepareStatement(ADD);
 			preparedStatement.setString(1, name);
 			preparedStatement.setDate(2, introducedDate.isPresent() ? java.sql.Date.valueOf(introducedDate.get()) : null);
@@ -201,30 +249,28 @@ public class ComputerDAO {
 			queryResult = preparedStatement.executeUpdate();
 			connection.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new DatabaseException(e.getMessage());
+			throw new DatabaseException("Impossible to add computer" + e.getMessage());
 		}
 		return (queryResult == 1);
 	}
 	
 	/**
-	 * Deletes a computer to the database
-	 * @param id the identifier of the computer to delete
-	 * @return true if the computer is deleted and false if not
+	 * Deletes computers to the database
+	 * @param idList the list of the id of the computers to delete separated by ","
+	 * @return true if the computers are deleted and false if not
 	 * @throws DatabaseException 
 	 * @throws UnknowComputerException 
 	 */
-	public boolean deleteComputerById(long id) throws DatabaseException, UnknowComputerException {
+	public boolean deleteComputerByList(String idList) throws DatabaseException, UnknowComputerException {
 		int queryResult = -1;
-		try (Connection connection = dao.getConnection()) {
-			PreparedStatement preparedStatement = connection.prepareStatement(DELETE);
-			preparedStatement.setLong(1, id);
+		try (Connection connection = connectionDAO.getConnection()) {
+			PreparedStatement preparedStatement = connection.prepareStatement(String.format(DELETE_BY_LIST, idList));
 			queryResult = preparedStatement.executeUpdate();
 			if (queryResult < 1) {
 				throw new UnknowComputerException();
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DatabaseException("Impossible to delete computers" + e.getMessage());
 		}
 		return (queryResult == 1);
 	}
@@ -235,17 +281,15 @@ public class ComputerDAO {
 	 * @return true if the computer is updated and false if not
 	 * @throws DatabaseException 
 	 */
-	public boolean updateComputerById(Computer computer) throws DatabaseException {
+	public boolean updateComputerById(Computer computer) throws DatabaseException, UnknowComputerException {
 		long id = computer.getId();
 		String name = computer.getName();
 		Optional<LocalDate> introducedDate = computer.getIntroducedDate();
 		Optional<LocalDate> discontinuedDate = computer.getDiscontinuedDate();
 		Optional<Company> company = computer.getCompany();
-		
 		int queryResult = -1;
-		try (Connection connection = dao.getConnection()) {
+		try (Connection connection = connectionDAO.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(UPDATE);
-			
 			preparedStatement.setString(1, name);
 			preparedStatement.setDate(2, introducedDate.isPresent() ? java.sql.Date.valueOf(introducedDate.get()) : null);
 			preparedStatement.setDate(3, discontinuedDate.isPresent() ? java.sql.Date.valueOf(discontinuedDate.get()) : null);
@@ -257,26 +301,28 @@ public class ComputerDAO {
 			}
 			preparedStatement.setLong(5, id);
 			queryResult = preparedStatement.executeUpdate();
+			if (queryResult < 1) {
+				throw new UnknowComputerException();
+			}
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new DatabaseException(e.getMessage());
+			throw new DatabaseException("Impossible to update computer" + e.getMessage());
 		}
-		
 		return (queryResult == 1);
 	}
 	
 	/**
-	 * Converts a string to a LocalDate
-	 * @param strDate the string to convert
-	 * @return the LocalDate
+	 * convert a sqlDate to an Optional<LocalDate> from a queryResult
+	 * @param queryResult the queryResult
+	 * @param field the field which contains the sqlDate
+	 * @return the sqlDate converts
+	 * @throws DatabaseException 
 	 */
-	private Optional<LocalDate> stringToLocalDate(String strDate) {
-		Optional<LocalDate> localDate = Optional.empty();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-		if (strDate != null) {
-			localDate = Optional.of(LocalDate.parse(strDate, formatter));
+	private Optional<LocalDate> sqlDateToLocalDate(ResultSet queryResult, String field) throws DatabaseException {
+		try {
+			return queryResult.getDate(field) == null ? Optional.empty() : Optional.of(queryResult.getDate(field).toLocalDate());
+		} catch (SQLException e) {
+			throw new DatabaseException("\"Impossible to convert the sqlDate to LocalDate" + e.getMessage());
 		}
-		return localDate;
 	}
 	
 }

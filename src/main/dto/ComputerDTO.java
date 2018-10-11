@@ -1,12 +1,11 @@
 package dto;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Optional;
-
+import mapper.DateMapper;
 import model.Computer;
 
 public class ComputerDTO {
+	
+	private DateMapper dateMapper;
 
 	private String id;
 	private String name;
@@ -15,10 +14,12 @@ public class ComputerDTO {
 	private String company;
 	
 	public ComputerDTO(Computer computer) {
+		dateMapper = DateMapper.getInstance();
+		
 		id = Long.toString(computer.getId());
 		name = computer.getName();
-		introducedDate = localDateToString(computer.getIntroducedDate());
-		discontinuedDate = localDateToString(computer.getDiscontinuedDate());
+		introducedDate = dateMapper.localDateToString(computer.getIntroducedDate(), "yyyy-MM-dd");
+		discontinuedDate = dateMapper.localDateToString(computer.getDiscontinuedDate(), "yyyy-MM-dd");
 		company = computer.getCompany().isPresent() ? computer.getCompany().get().getName() : "";
 	}
 	
@@ -51,15 +52,6 @@ public class ComputerDTO {
 	}
 	public void setCompany(String company) {
 		this.company = company;
-	}
-	
-	private String localDateToString(Optional<LocalDate> date) {
-		String strDate = "";
-		if (date.isPresent()) {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-			strDate = date.get().format(formatter);
-		}
-		return strDate;
 	}
 	
 }

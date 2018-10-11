@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import exception.DatabaseException;
 import exception.UnknowCompanyException;
+import mapper.DateMapper;
 import model.Company;
 import model.Computer;
 import service.CompanyService;
@@ -26,11 +27,13 @@ public class AddComputer extends HttpServlet {
 
 	private ComputerService computerService;
 	private CompanyService companyService;
+	private DateMapper dateMapper;
 	
 	public AddComputer() {
 		super();
 		computerService = ComputerService.getInstance();
 		companyService = CompanyService.getInstance();
+		dateMapper = DateMapper.getInstance();
 	}
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -47,39 +50,30 @@ public class AddComputer extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String computerName = request.getParameter("computerName");
-		Optional<LocalDate> introducedDate = stringToLocalDate(request.getParameter("introduced"));
-		Optional<LocalDate> discontinuedDate = stringToLocalDate(request.getParameter("discontinued"));
+		Optional<LocalDate> introducedDate = dateMapper.stringToLocalDate(request.getParameter("introduced"), "yyyy-MM-dd");
+		Optional<LocalDate> discontinuedDate = dateMapper.stringToLocalDate(request.getParameter("discontinued"), "yyyy-MM-dd");
+		Optional<String> strCompany = Optional.ofNullable(request.getParameter("companyId"));
 		Optional<Company> company = Optional.empty();
+		boolean computerAdded = false;
 		try {
-			if (!request.getParameter("companyId").equals("")) {
-				company =  companyService.getCompanyById(Integer.parseInt(request.getParameter("companyId")));
+			if (strCompany.isPresent()) {
+				company = companyService.getCompanyById(Integer.parseInt(request.getParameter("companyId")));
 			}
-			Computer computer = new Computer(computerName, introducedDate, discontinuedDate, company);
-			computerService.addComputer(computer);
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
+			Computer computer = new Computer.ComputerBuilder(computerName).introducedDate(introducedDate).discontinuedDate(discontinuedDate).company(company).build();
+			computerAdded = computerService.addComputer(computer);
 		} catch (DatabaseException e) {
 			e.printStackTrace();
 		} catch (UnknowCompanyException e) {
 			e.printStackTrace();
 		}
 		
-		doGet(request, response);
-	}
-	
-	private Optional<LocalDate> stringToLocalDate(String strDate) {
-		Optional<LocalDate> date = Optional.empty();
-		if (!strDate.equals("")) {
-			try {
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-				date = Optional.of(LocalDate.parse(strDate, formatter));
-			}
-			catch (DateTimeParseException e) {
-				e.printStackTrace();
-			}
-		}
 		
-		return date;
+		if (computerAdded) {
+			response.sendRedirect("Dashboard");
+		}
+		else {
+			doGet(request, response);			
+		}
 	}
 
 }

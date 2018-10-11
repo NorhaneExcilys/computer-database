@@ -25,15 +25,15 @@
             </h1>
             <div id="actions" class="form-horizontal">
                 <div class="pull-left">
-                    <form id="searchForm" action="#" method="GET" class="form-inline">
+                    <form id="searchForm" action=# method="GET" class="form-inline">
 
-                        <input type="search" id="searchbox" name="search" class="form-control" placeholder="Search name" />
+                        <input type="search" id="searchbox" name="search" class="form-control" placeholder="Search name" value="${search}" />
                         <input type="submit" id="searchsubmit" value="Filter by name"
                         class="btn btn-primary" />
                     </form>
                 </div>
                 <div class="pull-right">
-                    <a class="btn btn-success" id="addComputer" href="AddComputer">Add Computer</a> 
+                    <a class="btn btn-success" id="addComputer" href="AddComputer">Add Computer</a>
                     <a class="btn btn-default" id="editComputer" href="#" onclick="$.fn.toggleEditMode();">Edit</a>
                 </div>
             </div>
@@ -77,11 +77,10 @@
                 </thead>
                 <!-- Browse attribute computers -->
                 <tbody id="results">
-                
                 	<c:forEach items="${computers}" var="computer">
-						<tr>
+	                    <tr>
 	                        <td class="editMode">
-	                            <input type="checkbox" name="cb" class="cb" value="0">
+	                            <input type="checkbox" name="cb" class="cb" value="${computer.id}">
 	                        </td>
 	                        <td>
 	                            <a href="EditComputer?id=${computer.id}" onclick="">${computer.name}</a>
@@ -90,8 +89,7 @@
 	                        <td>${computer.discontinuedDate}</td>
 	                        <td>${computer.company}</td>
 	                    </tr>
-					</c:forEach>
-
+                    </c:forEach>
                 </tbody>
             </table>
         </div>
@@ -101,27 +99,26 @@
         <div class="container text-center">
             <ul class="pagination">
                 <li>
-                    <a href="#" aria-label="Previous">
-                      <span aria-hidden="true">&laquo;</span>
-                  </a>
-              </li>
-              <li><a href="#">1</a></li>
-              <li><a href="#">2</a></li>
-              <li><a href="#">3</a></li>
-              <li><a href="#">4</a></li>
-              <li><a href="#">5</a></li>
-              <li>
-                <a href="#" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-              </li>
-  	      	</ul>
-  	    </div>
+                	<a href="Dashboard?computersPerPage=${computersPerPage}&currentPage=1" aria-label="Previous">
+                    	<span aria-hidden="true">&laquo;</span>
+                	</a>
+              	</li>
+              	<c:forEach begin="${pageMin}" end="${pageMax}" var="page">
+              		<li><a href="Dashboard?computersPerPage=${computersPerPage}&currentPage=${page}">${page}</a></li>
+              	</c:forEach>
+              	<li>
+                	<a href="Dashboard?computersPerPage=${computersPerPage}&currentPage=${totalPage}" aria-label="Next">
+                    	<span aria-hidden="true">&raquo;</span>
+                	</a>
+            	</li>
+        	</ul>
 
-        <div class="btn-group btn-group-sm pull-right" role="group" >
-            <button type="button" class="btn btn-default">10</button>
-            <button type="button" class="btn btn-default">50</button>
-            <button type="button" class="btn btn-default">100</button>
+	        <div class="btn-group btn-group-sm pull-right" role="group" >
+	            <button type="button" class="btn btn-default" onclick="location.href='Dashboard?computersPerPage=10&currentPage=1'">10</button>
+	            <button type="button" class="btn btn-default" onclick="location.href='Dashboard?computersPerPage=50&currentPage=1'">50</button>
+	            <button type="button" class="btn btn-default" onclick="location.href='Dashboard?computersPerPage=100&currentPage=1'">100</button>
+	        </div>
+	        
         </div>
 
     </footer>

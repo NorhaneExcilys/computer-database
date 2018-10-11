@@ -184,7 +184,7 @@ public class UserInterface {
 				if (computerId < 0) {
 					throw new NumberFormatException();
 				}
-				success = computerService.deleteComputerById(computerId);
+				success = computerService.deleteComputerByList(input);
 			}
 			catch (NumberFormatException e) {
 				System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the computer.");
@@ -224,7 +224,7 @@ public class UserInterface {
 		Computer computer;
 		boolean success = false;
 		try {
-			computer = new Computer(computerName, introducedDate, discontinuedDate, company);
+			computer = new Computer.ComputerBuilder(computerName).introducedDate(introducedDate).discontinuedDate(discontinuedDate).company(company).build();
 			success = computerService.addComputer(computer);
 		} catch (DatabaseException e) {
 			System.out.print(e.getMessage());
@@ -281,8 +281,7 @@ public class UserInterface {
 			System.out.println("Please enter the new company identifier of the computer.");
 			currentCompany = inputManager.askCompany();
 		}
-		
-		Computer updatedComputer = new Computer(currentId, currentName, currentIntroducedDate, currentDiscontinuedDate, currentCompany);
+		Computer updatedComputer = new Computer.ComputerBuilder(currentName).id(currentId).introducedDate(currentIntroducedDate).discontinuedDate(currentDiscontinuedDate).company(currentCompany).build();
 		boolean success;
 		try {
 			success = computerService.updateComputerById(updatedComputer);
@@ -294,7 +293,10 @@ public class UserInterface {
 			}
 		} catch (DatabaseException e) {
 			System.out.println(e.getMessage());
-		}	
+		} catch (UnknowComputerException e) {
+			System.out.println(e.getMessage());
+		}
+		
 	}
 
 	/**

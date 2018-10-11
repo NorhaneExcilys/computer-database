@@ -17,7 +17,7 @@ import model.Company;
  * A CompanyDAO is characterized by the following informations:
  * <ul>
  * <li> A companyDAO</li>
- * <li> A dao</li>
+ * <li> A connectionDAO</li>
  * </ul>
  * @author elgharbi
  *
@@ -28,13 +28,13 @@ public class CompanyDAO {
 	private final static String GET_BY_ID = "SELECT id, name FROM company WHERE id = ?;";
 	
 	private static CompanyDAO companyDAO;
-	private DAO dao;
+	private ConnectionDAO connectionDAO;
 	
 	/**
 	 * builds CompanyDAO
 	 */
 	private CompanyDAO() {
-		this.dao = DAO.getInstance();
+		this.connectionDAO = connectionDAO.getInstance();
 	}
 
 	/**
@@ -56,7 +56,7 @@ public class CompanyDAO {
 	public List<Company> getAll() throws DatabaseException {
 		List<Company> allCompanies = new ArrayList<Company>();
 		
-		try (Connection connection = dao.getConnection()) {
+		try (Connection connection = connectionDAO.getConnection()) {
 			ResultSet queryResult = connection.createStatement().executeQuery(GET_ALL);
 			while (queryResult.next()) {
 				long currentId = queryResult.getLong("id");
@@ -65,8 +65,7 @@ public class CompanyDAO {
 				allCompanies.add(currentCompany);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new DatabaseException(e.getMessage());
+			throw new DatabaseException("Impossible to get companies" + e.getMessage());
 		}
 		
 		return allCompanies;
@@ -82,7 +81,7 @@ public class CompanyDAO {
 	public Optional<Company> getById(long id) throws DatabaseException, UnknowCompanyException {
 		Optional<Company> company = Optional.empty();
 		
-		try (Connection connection = dao.getConnection()) {
+		try (Connection connection = connectionDAO.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
 			preparedStatement.setLong(1, id); 
 			ResultSet queryResult = preparedStatement.executeQuery();
@@ -95,8 +94,7 @@ public class CompanyDAO {
 				throw new UnknowCompanyException();
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new DatabaseException(e.getMessage());
+			throw new DatabaseException("Impossible to get company by id" + e.getMessage());
 		}
 
 		return company;

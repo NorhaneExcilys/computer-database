@@ -7,6 +7,7 @@ import exception.DatabaseException;
 import exception.UnknowCompanyException;
 import exception.UnknowComputerException;
 import model.Computer;
+import model.Paging;
 import persistance.ComputerDAO;
 
 public class ComputerService {
@@ -26,28 +27,33 @@ public class ComputerService {
 		return computerService;
 	}
 	
-	public int getCount() throws DatabaseException {
-		return computerDAO.getCount();
+	public int getCount(Optional<String> word) throws DatabaseException {
+		return word.isPresent() ? computerDAO.getCountBySearchedWord(word.get()) : computerDAO.getCount();
 	}
 	
 	public List<Computer> getComputers() throws DatabaseException, UnknowCompanyException {
 		return computerDAO.getAll();
 	}
 	
-	public List<Computer> getByPage(int computerNumber, int pageNumber) throws DatabaseException, UnknowCompanyException {
-		return computerDAO.getByPage(computerNumber, pageNumber);
+	public List<Computer> getByPage(Paging paging) throws DatabaseException, UnknowCompanyException {
+		return computerDAO.getByPage(paging);
 	}
 	
 	public Optional<Computer> getById(long id) throws DatabaseException, UnknowComputerException, UnknowCompanyException {
 		return computerDAO.getById(id);
 	}
 	
-	public boolean updateComputerById(Computer computer) throws DatabaseException {
+	public List<Computer> getBySearchedWord(String word) throws DatabaseException, UnknowCompanyException {
+		return computerDAO.getBySearchedWord(word);
+	}
+	
+	
+	public boolean updateComputerById(Computer computer) throws DatabaseException, UnknowComputerException {
 		return computerDAO.updateComputerById(computer);
 	}
 	
-	public boolean deleteComputerById(int id) throws DatabaseException, UnknowComputerException {
-		return computerDAO.deleteComputerById(id);
+	public boolean deleteComputerByList(String idList) throws DatabaseException, UnknowComputerException {
+		return computerDAO.deleteComputerByList(idList);
 	}
 	
 	public boolean addComputer(Computer computer) throws DatabaseException {

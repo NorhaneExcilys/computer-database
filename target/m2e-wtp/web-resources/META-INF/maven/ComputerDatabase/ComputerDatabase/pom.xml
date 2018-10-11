@@ -7,7 +7,8 @@
   <name>ComputerDatabaseMaven</name>
   <description>Computer Database Maven</description>
   <build>
-    <sourceDirectory>src</sourceDirectory>
+      <sourceDirectory>src/main</sourceDirectory>
+      <testSourceDirectory>src/test</testSourceDirectory>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -29,48 +30,83 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <junit.version>4.12</junit.version>
+    <log4j.version>1.2.17</log4j.version>
+    <logback-classic.version>1.2.3</logback-classic.version>
+	<mockito-all.version>1.9.5</mockito-all.version>
+    <mysql-connector-java.version>5.1.6</mysql-connector-java.version>
+	<logback-classic.version>1.0.13</logback-classic.version>
+    <slf4j-jdk14.version>1.8.0-beta2</slf4j-jdk14.version>
+    <javax.servlet-api.version>3.0.1</javax.servlet-api.version>
+    <HikariCP.version>3.2.0</HikariCP.version>
+    <jstl.version>1.2</jstl.version>
   </properties>
         
   <dependencies>
-	<!-- https://mvnrepository.com/artifact/junit/junit -->
+	
 	<dependency>
 	    <groupId>junit</groupId>
 	    <artifactId>junit</artifactId>
-	    <version>4.12</version>
+	    <version>${junit.version}</version>
+	    <scope>test</scope>
+	</dependency>
+	
+	<dependency>
+	    <groupId>log4j</groupId>
+	    <artifactId>log4j</artifactId>
+	    <version>${log4j.version}</version>
+	</dependency>
+	
+	<dependency>
+	    <groupId>ch.qos.logback</groupId>
+	    <artifactId>logback-classic</artifactId>
+	    <version>${logback-classic.version}</version>
+	    <scope>test</scope>
+	</dependency>
+	
+	<dependency>
+	    <groupId>org.mockito</groupId>
+	    <artifactId>mockito-all</artifactId>
+	    <version>${mockito-all.version}</version>
 	    <scope>test</scope>
 	</dependency>
 
-	<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
 	<dependency>
 	    <groupId>mysql</groupId>
 	    <artifactId>mysql-connector-java</artifactId>
-	    <version>5.1.6</version>
+	    <version>${mysql-connector-java.version}</version>
 	</dependency> 
 
 	<dependency> 
 	  <groupId>ch.qos.logback</groupId>
 	  <artifactId>logback-classic</artifactId>
-	  <version>1.0.13</version>
+	  <version>${logback-classic.version}</version>
 	</dependency>
 
 	<dependency> 
 	  <groupId>org.slf4j</groupId>
 	  <artifactId>slf4j-jdk14</artifactId>
-	  <version>1.8.0-beta2</version>
+	  <version>${slf4j-jdk14.version}</version>
 	</dependency>
 
 	<dependency>
 	    <groupId>javax.servlet</groupId>
 	    <artifactId>javax.servlet-api</artifactId>
-	    <version>3.0.1</version>
+	    <version>${javax.servlet-api.version}</version>
 	    <scope>provided</scope>
 	</dependency>
-
-	<!-- https://mvnrepository.com/artifact/jstl/jstl -->
+	
+	<dependency>
+	    <groupId>com.zaxxer</groupId>
+	    <artifactId>HikariCP</artifactId>
+	    <version>${HikariCP.version}</version>
+	</dependency>
+	
 	<dependency>
 	    <groupId>jstl</groupId>
 	    <artifactId>jstl</artifactId>
-	    <version>1.2</version>
+	    <version>${jstl.version}</version>
 	</dependency>
+	
   </dependencies>
 </project>
