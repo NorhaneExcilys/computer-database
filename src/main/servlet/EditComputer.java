@@ -2,8 +2,6 @@ package servlet;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +11,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import exception.DatabaseException;
 import exception.UnknowCompanyException;
@@ -29,6 +30,7 @@ import service.ComputerService;
 @WebServlet("/EditComputer")
 public class EditComputer extends HttpServlet {
 
+	private Logger logger = LoggerFactory.getLogger("EditComputer");
 	
 	private ComputerService computerService;
 	private CompanyService companyService;
@@ -39,8 +41,7 @@ public class EditComputer extends HttpServlet {
 	private Optional<LocalDate> introducedDate;
 	private Optional<LocalDate> discontinuedDate;
 	private Optional<Company> company;
-	
-	
+		
 	public EditComputer() {
 		super();
 		computerService = ComputerService.getInstance();
@@ -54,12 +55,11 @@ public class EditComputer extends HttpServlet {
 		company = Optional.empty();
 	}
 	
-	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
 			id = Long.parseLong(request.getParameter("id"));
 		} catch(NumberFormatException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		
 		Optional<Computer> computer;
@@ -72,18 +72,18 @@ public class EditComputer extends HttpServlet {
 				company = computer.get().getCompany();
 			}
 		} catch (DatabaseException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		} catch (UnknowComputerException e) {
-			e.printStackTrace();
+			logger.error("Unknow computer");
 		} catch (UnknowCompanyException e) {
-			e.printStackTrace();
+			logger.error("Unknow company");
 		}
 		
 		List<Company> companies = new ArrayList<Company>();
 		try {
 			companies = companyService.getCompanies();
 		} catch (DatabaseException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		
 		String companyId = "";
@@ -112,11 +112,11 @@ public class EditComputer extends HttpServlet {
 			try {
 				company = companyService.getCompanyById(Long.parseLong(request.getParameter("companyId")));
 			} catch (NumberFormatException e) {
-				e.printStackTrace();
+				logger.error(e.getMessage());;
 			} catch (DatabaseException e) {
-				e.printStackTrace();
+				logger.error(e.getMessage());
 			} catch (UnknowCompanyException e) {
-				e.printStackTrace();
+				logger.error("Unknow company");
 			}
 		}
 		
@@ -125,9 +125,9 @@ public class EditComputer extends HttpServlet {
 		try {
 			computerUpadated = computerService.updateComputerById(computer);
 		} catch (DatabaseException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		} catch (UnknowComputerException e) {
-			e.printStackTrace();
+			logger.error("Unknow company");
 		}
 		
 		if (computerUpadated) {
@@ -136,10 +136,6 @@ public class EditComputer extends HttpServlet {
 		else {
 			doGet(request, response);			
 		}
-
 	}
 	
-	
-
-
 }

@@ -71,7 +71,7 @@ public class Dashboard extends HttpServlet {
 			totalComputers = computerService.getCount(searchedWord);
 			totalPage = totalComputers / currentPaging.getComputersPerPage() + 1;
 		} catch (DatabaseException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 
 		try {
@@ -92,7 +92,7 @@ public class Dashboard extends HttpServlet {
 		} catch (DatabaseException e) {
 			logger.error(e.getMessage());
 		} catch (UnknowCompanyException e) {
-			e.printStackTrace();
+			logger.error("Unknow company");
 		}
 		
 		request.setAttribute("computers", computersDTO);
@@ -115,9 +115,9 @@ public class Dashboard extends HttpServlet {
 		try {
 			computerService.deleteComputerByList(computerToDelete);
 		} catch (DatabaseException e) {
-			logger.error("Impossible to connect to the database" + e);
+			logger.error(e.getMessage());
 		} catch (UnknowComputerException e) {
-			e.printStackTrace();
+			logger.error("Unknow company");
 		}
 		
 		doGet(request, response);

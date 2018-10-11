@@ -47,7 +47,6 @@ public class ComputerService {
 		return computerDAO.getBySearchedWord(word);
 	}
 	
-	
 	public boolean updateComputerById(Computer computer) throws DatabaseException, UnknowComputerException {
 		return computerDAO.updateComputerById(computer);
 	}

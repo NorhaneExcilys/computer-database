@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"exception"},{"l":"model"},{"l":"persistance"},{"l":"service"},{"l":"servlet"},{"l":"ui"}]
+packageSearchIndex = [{"l":"dto"},{"l":"exception"},{"l":"mapper"},{"l":"model"},{"l":"service"},{"l":"servlet"},{"l":"ui"},{"l":"validator"}]
