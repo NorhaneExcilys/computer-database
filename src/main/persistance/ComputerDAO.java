@@ -5,13 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import exception.DatabaseException;
 import exception.UnknowCompanyException;
@@ -41,7 +37,6 @@ public class ComputerDAO {
 	private final static String GET_BY_SEARCHED_WORD = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE name LIKE ?;";
 	private final static String ADD = "INSERT INTO computer (name, introduced, discontinued, company_id) VALUE (?, ?, ?, ?);";
 	private final static String UPDATE = "UPDATE computer SET name = ?, introduced = ?, discontinued = ?, company_id = ? WHERE id = ?;";
-	private final static String DELETE = "DELETE FROM computer WHERE id = ?";
 	private final static String DELETE_BY_LIST = "DELETE FROM computer WHERE id IN (%s)";
 	
 	private static ComputerDAO computerDAO;
@@ -49,7 +44,7 @@ public class ComputerDAO {
 	private ConnectionDAO connectionDAO;
 	
 	private ComputerDAO() {
-		this.connectionDAO = connectionDAO.getInstance();
+		this.connectionDAO = ConnectionDAO.getInstance();
 		this.companyDAO = CompanyDAO.getInstance();
 	}
 	

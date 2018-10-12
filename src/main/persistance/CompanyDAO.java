@@ -34,7 +34,7 @@ public class CompanyDAO {
 	 * builds CompanyDAO
 	 */
 	private CompanyDAO() {
-		this.connectionDAO = connectionDAO.getInstance();
+		this.connectionDAO = ConnectionDAO.getInstance();
 	}
 
 	/**
@@ -55,7 +55,6 @@ public class CompanyDAO {
 	 */
 	public List<Company> getAll() throws DatabaseException {
 		List<Company> allCompanies = new ArrayList<Company>();
-		
 		try (Connection connection = connectionDAO.getConnection()) {
 			ResultSet queryResult = connection.createStatement().executeQuery(GET_ALL);
 			while (queryResult.next()) {
@@ -67,7 +66,6 @@ public class CompanyDAO {
 		} catch (SQLException e) {
 			throw new DatabaseException("Impossible to get companies" + e.getMessage());
 		}
-		
 		return allCompanies;
 	}
 	
@@ -80,7 +78,6 @@ public class CompanyDAO {
 	 */
 	public Optional<Company> getById(long id) throws DatabaseException, UnknowCompanyException {
 		Optional<Company> company = Optional.empty();
-		
 		try (Connection connection = connectionDAO.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
 			preparedStatement.setLong(1, id); 
@@ -96,7 +93,6 @@ public class CompanyDAO {
 		} catch (SQLException e) {
 			throw new DatabaseException("Impossible to get company by id" + e.getMessage());
 		}
-
 		return company;
 	}
 	

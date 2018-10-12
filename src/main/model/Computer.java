@@ -27,10 +27,7 @@ public class Computer {
 	
 	/**
 	 * builds Computer defined by a computerBuilder
-	 * @param name the name of the computer
-	 * @param introducedDate the introduced date of the computer
-	 * @param discontinuedDate the discontinued date of the computer
-	 * @param company the company of the computer
+	 * @param computerBuilder the companyBuilder
 	 */
 	private Computer(ComputerBuilder computerBuilder) {
 		this.id = computerBuilder.id;

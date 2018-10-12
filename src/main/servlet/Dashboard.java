@@ -15,6 +15,7 @@ import dto.ComputerDTO;
 import exception.DatabaseException;
 import exception.UnknowCompanyException;
 import exception.UnknowComputerException;
+import mapper.ComputerMapper;
 import model.Computer;
 import model.Paging;
 import service.ComputerService;
@@ -33,8 +34,10 @@ public class Dashboard extends HttpServlet {
 	
 	private final static int DEFAULT_COMPUTERS_PER_PAGE = 50;
 	private final static int DEFAULT_CURRENT_PAGE = 1;
+	private final static int DEFAULT_PAGE_STEP = 3;
 	
 	private ComputerService computerService;
+	private ComputerMapper computerMapper;
 	
 	private List<ComputerDTO> computersDTO;
 	private Paging currentPaging;
@@ -45,9 +48,10 @@ public class Dashboard extends HttpServlet {
 	public Dashboard() {
 		super();
 		computerService = ComputerService.getInstance();
+		computerMapper = ComputerMapper.getInstance();
+		
 		computersDTO = new ArrayList<ComputerDTO>();
 		currentPaging = new Paging(DEFAULT_COMPUTERS_PER_PAGE, DEFAULT_CURRENT_PAGE);
-
 		totalPage = 0;
 		totalComputers = 0;
 	}
@@ -69,7 +73,10 @@ public class Dashboard extends HttpServlet {
 		
 		try {
 			totalComputers = computerService.getCount(searchedWord);
-			totalPage = totalComputers / currentPaging.getComputersPerPage() + 1;
+			totalPage = totalComputers / currentPaging.getComputersPerPage();
+			if (totalComputers % currentPaging.getComputersPerPage() != 0) {
+				totalPage++;
+			}
 		} catch (DatabaseException e) {
 			logger.error(e.getMessage());
 		}
@@ -86,7 +93,7 @@ public class Dashboard extends HttpServlet {
 				computers = computerService.getByPage(currentPaging);
 			}
 			for (int index = 0; index < computers.size(); index++) {
-				ComputerDTO computer = new ComputerDTO(computers.get(index));
+				ComputerDTO computer = computerMapper.computerToComputerDTO(computers.get(index), "yyyy-MM-dd");
 				computersDTO.add(computer);
 			}	
 		} catch (DatabaseException e) {
@@ -100,9 +107,8 @@ public class Dashboard extends HttpServlet {
 		request.setAttribute("search", searchedWord.isPresent() ? searchedWord.get() : "");
 		
 		request.setAttribute("totalPage", totalPage);
-		request.setAttribute("pageMin", (currentPaging.getCurrentPage() - 3) > 0 ? currentPaging.getCurrentPage() - 3 : 1);
-		request.setAttribute("pageMax", (currentPaging.getCurrentPage() + 3) <= totalPage ? currentPaging.getCurrentPage() + 3 : totalPage);
-		
+		request.setAttribute("pageMin", (currentPaging.getCurrentPage() - DEFAULT_PAGE_STEP) > 0 ? currentPaging.getCurrentPage() - DEFAULT_PAGE_STEP : 1);
+		request.setAttribute("pageMax", (currentPaging.getCurrentPage() + DEFAULT_PAGE_STEP) <= totalPage ? currentPaging.getCurrentPage() + DEFAULT_PAGE_STEP : totalPage);
 		request.setAttribute("currentPage", currentPaging.getCurrentPage());
 		request.setAttribute("computersPerPage", currentPaging.getComputersPerPage());
 		
@@ -117,7 +123,7 @@ public class Dashboard extends HttpServlet {
 		} catch (DatabaseException e) {
 			logger.error(e.getMessage());
 		} catch (UnknowComputerException e) {
-			logger.error("Unknow company");
+			logger.error("Unknow computer");
 		}
 		
 		doGet(request, response);

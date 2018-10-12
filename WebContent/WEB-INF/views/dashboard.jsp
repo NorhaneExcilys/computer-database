@@ -87,7 +87,7 @@
 	                        </td>
 	                        <td>${computer.introducedDate}</td>
 	                        <td>${computer.discontinuedDate}</td>
-	                        <td>${computer.company}</td>
+	                        <td>${computer.companyName}</td>
 	                    </tr>
                     </c:forEach>
                 </tbody>

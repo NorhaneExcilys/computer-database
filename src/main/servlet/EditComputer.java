@@ -15,10 +15,16 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dto.ComputerDTO;
 import exception.DatabaseException;
+import exception.IncorrectComputerDTOException;
+import exception.IncorrectDateException;
+import exception.IncorrectIdException;
+import exception.IncorrectNameException;
+import exception.IntroducedAfterDiscontinuedException;
 import exception.UnknowCompanyException;
 import exception.UnknowComputerException;
-import mapper.DateMapper;
+import mapper.ComputerMapper;
 import model.Company;
 import model.Computer;
 import service.CompanyService;
@@ -34,28 +40,17 @@ public class EditComputer extends HttpServlet {
 	
 	private ComputerService computerService;
 	private CompanyService companyService;
-	private DateMapper dateMapper;
-	
-	private long id;
-	private String name;
-	private Optional<LocalDate> introducedDate;
-	private Optional<LocalDate> discontinuedDate;
-	private Optional<Company> company;
+	private ComputerMapper computerMapper;
 		
 	public EditComputer() {
 		super();
 		computerService = ComputerService.getInstance();
 		companyService = CompanyService.getInstance();
-		dateMapper = DateMapper.getInstance();
-		
-		id = -1;
-		name = "";
-		introducedDate = Optional.empty();
-		discontinuedDate = Optional.empty();
-		company = Optional.empty();
+		computerMapper = ComputerMapper.getInstance();
 	}
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		long id = -1;
 		try {
 			id = Long.parseLong(request.getParameter("id"));
 		} catch(NumberFormatException e) {
@@ -66,10 +61,12 @@ public class EditComputer extends HttpServlet {
 		try {
 			computer = computerService.getById(id);
 			if (computer.isPresent()) {
-				name = computer.get().getName();
-				introducedDate = computer.get().getIntroducedDate();
-				discontinuedDate = computer.get().getDiscontinuedDate();
-				company = computer.get().getCompany();
+				ComputerDTO computerDTO = computerMapper.computerToComputerDTO(computer.get(), "yyyy-MM-dd");
+				request.setAttribute("id", computerDTO.getId());
+				request.setAttribute("name", computerDTO.getName());
+				request.setAttribute("introduced", computerDTO.getIntroducedDate());
+				request.setAttribute("discontinued", computerDTO.getDiscontinuedDate());
+				request.setAttribute("companyId", computerDTO.getCompanyId());
 			}
 		} catch (DatabaseException e) {
 			logger.error(e.getMessage());
@@ -86,48 +83,40 @@ public class EditComputer extends HttpServlet {
 			logger.error(e.getMessage());
 		}
 		
-		String companyId = "";
-		if (company.isPresent()) {
-			companyId = Long.toString(company.get().getId());
-		}
-
-		request.setAttribute("id", id);
-		request.setAttribute("name", name);
-		request.setAttribute("introduced", dateMapper.localDateToString(introducedDate, "yyyy-MM-dd"));
-		request.setAttribute("discontinued", dateMapper.localDateToString(discontinuedDate, "yyyy-MM-dd"));
-		request.setAttribute("companyId", companyId);
 		request.setAttribute("companies", companies);
-
 		request.getRequestDispatcher("/WEB-INF/views/editComputer.jsp").forward(request,response);
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		name = request.getParameter("name");
-		introducedDate = dateMapper.stringToLocalDate(request.getParameter("introduced"), "yyyy-MM-dd");
-		discontinuedDate = dateMapper.stringToLocalDate(request.getParameter("discontinued"), "yyyy-MM-dd");
-		if (request.getParameter("companyId") == null) {
-			company = Optional.empty();
-		}
-		else {
-			try {
-				company = companyService.getCompanyById(Long.parseLong(request.getParameter("companyId")));
-			} catch (NumberFormatException e) {
-				logger.error(e.getMessage());;
-			} catch (DatabaseException e) {
-				logger.error(e.getMessage());
-			} catch (UnknowCompanyException e) {
-				logger.error("Unknow company");
-			}
-		}
+		long id = Long.parseLong(request.getParameter("id"));
+		String strName = request.getParameter("name");
+		String strIntroducedDate = request.getParameter("introduced");
+		String strDiscontinuedDate = request.getParameter("discontinued");
+		String strCompanyId = request.getParameter("companyId");
 		
-		Computer computer = new Computer.ComputerBuilder(name).id(id).introducedDate(introducedDate).discontinuedDate(discontinuedDate).company(company).build();
+		ComputerDTO computerDTO = new ComputerDTO.ComputerDTOBuilder(strName).id(Long.toString(id)).introducedDate(strIntroducedDate).discontinuedDate(strDiscontinuedDate).companyId(strCompanyId).build();
+		
+		Computer computer;
 		boolean computerUpadated = false;
 		try {
+			computer = computerMapper.computerDTOToComputer(computerDTO, "yyyy-MM-dd");
 			computerUpadated = computerService.updateComputerById(computer);
+		} catch (IncorrectNameException e) {
+			logger.error(e.getMessage());
+		} catch (IncorrectIdException e) {
+			logger.error(e.getMessage());
+		} catch (IncorrectDateException e) {
+			logger.error(e.getMessage());
+		} catch (IntroducedAfterDiscontinuedException e) {
+			logger.error(e.getMessage());;
+		} catch (IncorrectComputerDTOException e) {
+			logger.error(e.getMessage());
+		} catch (UnknowCompanyException e) {
+			logger.error(e.getMessage());
 		} catch (DatabaseException e) {
 			logger.error(e.getMessage());
 		} catch (UnknowComputerException e) {
-			logger.error("Unknow company");
+			logger.error("Unknow computer");
 		}
 		
 		if (computerUpadated) {

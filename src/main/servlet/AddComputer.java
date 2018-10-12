@@ -1,22 +1,26 @@
 package servlet;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import dto.ComputerDTO;
 import exception.DatabaseException;
+import exception.IncorrectComputerDTOException;
+import exception.IncorrectDateException;
+import exception.IncorrectIdException;
+import exception.IncorrectNameException;
+import exception.IntroducedAfterDiscontinuedException;
 import exception.UnknowCompanyException;
-import mapper.DateMapper;
+import mapper.ComputerMapper;
 import model.Company;
 import model.Computer;
 import service.CompanyService;
@@ -27,13 +31,15 @@ public class AddComputer extends HttpServlet {
 
 	private ComputerService computerService;
 	private CompanyService companyService;
-	private DateMapper dateMapper;
+	private ComputerMapper computerMapper;
+	
+	private Logger logger = LoggerFactory.getLogger("AddComputer");
 	
 	public AddComputer() {
 		super();
 		computerService = ComputerService.getInstance();
 		companyService = CompanyService.getInstance();
-		dateMapper = DateMapper.getInstance();
+		computerMapper = ComputerMapper.getInstance();
 	}
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -50,24 +56,32 @@ public class AddComputer extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String computerName = request.getParameter("computerName");
-		Optional<LocalDate> introducedDate = dateMapper.stringToLocalDate(request.getParameter("introduced"), "yyyy-MM-dd");
-		Optional<LocalDate> discontinuedDate = dateMapper.stringToLocalDate(request.getParameter("discontinued"), "yyyy-MM-dd");
-		Optional<String> strCompany = Optional.ofNullable(request.getParameter("companyId"));
-		Optional<Company> company = Optional.empty();
+		String strIntroducedDate = request.getParameter("introduced");
+		String strDiscontinuedDate = request.getParameter("discontinued");
+		String strCompanyId = request.getParameter("companyId");
+		
+		ComputerDTO computerDTO = new ComputerDTO.ComputerDTOBuilder(computerName).introducedDate(strIntroducedDate).discontinuedDate(strDiscontinuedDate).companyId(strCompanyId).build();
+
 		boolean computerAdded = false;
 		try {
-			if (strCompany.isPresent()) {
-				company = companyService.getCompanyById(Integer.parseInt(request.getParameter("companyId")));
-			}
-			Computer computer = new Computer.ComputerBuilder(computerName).introducedDate(introducedDate).discontinuedDate(discontinuedDate).company(company).build();
+			Computer computer = computerMapper.computerDTOToComputer(computerDTO, "yyyy-MM-dd");
 			computerAdded = computerService.addComputer(computer);
+		} catch (IncorrectNameException e) {
+			logger.error(e.getMessage());
+		} catch (IncorrectIdException e) {
+			logger.error(e.getMessage());
+		} catch (IncorrectDateException e) {
+			logger.error(e.getMessage());
+		} catch (IntroducedAfterDiscontinuedException e) {
+			logger.error(e.getMessage());
+		} catch (IncorrectComputerDTOException e) {
+			logger.error(e.getMessage());
 		} catch (DatabaseException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		} catch (UnknowCompanyException e) {
-			e.printStackTrace();
+			logger.error("Unknow company");
 		}
-		
-		
+
 		if (computerAdded) {
 			response.sendRedirect("Dashboard");
 		}

@@ -1,31 +1,41 @@
 package validator;
 
-
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Optional;
 
+import dto.ComputerDTO;
 import exception.IncorrectNameException;
+import exception.IntroducedAfterDiscontinuedException;
 import exception.IncorrectDateException;
 import exception.IncorrectIdException;
-import mapper.DateMapper;
 
 public class Validator {
 	
-	private DateMapper dateMapper;
+	private static Validator validator;
 	
-	public Validator() {
-		dateMapper = DateMapper.getInstance();
+	public static Validator getInstance() {
+		if (validator == null) {
+			validator = new Validator();
+		}
+		return validator;
 	}
 	
-	public boolean isValidName(String strName) throws IncorrectNameException {
+	public boolean validComputer(ComputerDTO computerDTO, String format) throws IncorrectNameException, IncorrectIdException, IncorrectDateException, IntroducedAfterDiscontinuedException {
+		return isValidName(computerDTO.getName()) && introducedIsBeforeDiscontinued(computerDTO.getIntroducedDate(), computerDTO.getDiscontinuedDate(), format) && isValidId(computerDTO.getCompanyId());
+	}
+	
+	private boolean isValidName(String strName) throws IncorrectNameException {
 		if (!strName.trim().equals("")) {
 			return true;
 		}
 		throw new IncorrectNameException();
 	}
 	
-	public boolean isValidId(String strId) throws IncorrectIdException {
+	private boolean isValidId(String strId) throws IncorrectIdException {
+		if (strId == null) {
+			return true;
+		}
 		try {
 			long id = Long.parseLong(strId);
 			if (id >= 0) {
@@ -38,44 +48,40 @@ public class Validator {
 		throw new IncorrectIdException();
 	}
 	
-	public boolean isValidDate(String strDate) throws IncorrectDateException {
+	public boolean isValidDate(String strDate, String format) throws IncorrectDateException {
+		if (strDate.equals("")) {
+			return true;
+		}
 		try {
-			Optional<LocalDate> date = dateMapper.stringToLocalDate(strDate, "yyyy-MM-dd");
-			if (!date.isPresent()) {
-				return true;
-			}
-			else {
-				if (date.get().getYear() > 1970) {
-					return true;
-				}
-			}
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+			LocalDate.parse(strDate, formatter);
+			return true;
 		}
 		catch (DateTimeParseException e) {
 			throw new IncorrectDateException();
 		}
-		throw new IncorrectDateException();
 	}
 	
-	public boolean compareDate(String strIntroducedDate, String strDiscontinuedDate) throws IncorrectDateException {
-		try {
-			if (isValidDate(strIntroducedDate) && isValidDate(strDiscontinuedDate)) {
-				Optional<LocalDate> introducedDate = dateMapper.stringToLocalDate(strIntroducedDate, "yyyy-MM-dd");
-				Optional<LocalDate> discontinuedDate = dateMapper.stringToLocalDate(strDiscontinuedDate, "yyyy-MM-dd");
-				if (introducedDate.isPresent() && discontinuedDate.isPresent()) {
-					if (introducedDate.get().isAfter(discontinuedDate.get())){
-						return true;
-					}
-				}
-				else {
+	private boolean introducedIsBeforeDiscontinued(String strIntroducedDate, String strDiscontinuedDate, String format) throws IncorrectDateException, IntroducedAfterDiscontinuedException {
+		if (strIntroducedDate.equals("") || strDiscontinuedDate.equals("")) {
+			return true;
+		}
+		else {
+			try {
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+				LocalDate introducedDate = LocalDate.parse(strIntroducedDate, formatter);
+				LocalDate discontinuedDate = LocalDate.parse(strDiscontinuedDate, formatter);
+				if (!introducedDate.isAfter(discontinuedDate)){
 					return true;
 				}
+				else {
+					throw new IntroducedAfterDiscontinuedException();
+				}
 			}
-		} catch (DateTimeParseException e) {
-			throw new IncorrectDateException();
-		} catch (IncorrectDateException e) {
-			throw new IncorrectDateException();
+			catch (DateTimeParseException e) {
+				throw new IncorrectDateException();
+			}	
 		}
-		throw new IncorrectDateException();
 	}
 	
 }
