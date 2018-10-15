@@ -26,6 +26,7 @@ public class CompanyDAO {
 
 	private final static String GET_ALL = "SELECT id, name FROM company;";
 	private final static String GET_BY_ID = "SELECT id, name FROM company WHERE id = ?;";
+	private final static String DELETE_BY_ID = "DELETE FROM company WHERE id = ?;";
 	
 	private static CompanyDAO companyDAO;
 	private ConnectionDAO connectionDAO;
@@ -94,6 +95,24 @@ public class CompanyDAO {
 			throw new DatabaseException("Impossible to get company by id" + e.getMessage());
 		}
 		return company;
+	}
+	
+	public boolean deleteById(long id, ComputerDAO computerDAO) throws DatabaseException, UnknowCompanyException {
+		try (Connection connection = connectionDAO.getConnection()) {
+			connection.setAutoCommit(false);
+			computerDAO.deleteComputerByCompanyId(connection, id);
+			int queryResultCompany = -1;
+			PreparedStatement preparedStatement = connection.prepareStatement(DELETE_BY_ID);
+			preparedStatement.setLong(1, id);
+			queryResultCompany = preparedStatement.executeUpdate();
+			if (queryResultCompany < 1) {
+				throw new UnknowCompanyException();
+			}	
+			connection.commit(); 
+		} catch (SQLException e) {
+			throw new DatabaseException("Impossible to delete company by id" + e.getMessage());
+		}		
+		return false;
 	}
 	
 }

@@ -31,10 +31,6 @@ public class ComputerService {
 		return word.isPresent() ? computerDAO.getCountBySearchedWord(word.get()) : computerDAO.getCount();
 	}
 	
-	public List<Computer> getComputers() throws DatabaseException, UnknowCompanyException {
-		return computerDAO.getAll();
-	}
-	
 	public List<Computer> getByPage(Paging paging) throws DatabaseException, UnknowCompanyException {
 		return computerDAO.getByPage(paging);
 	}

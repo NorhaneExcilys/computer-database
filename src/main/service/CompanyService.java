@@ -7,15 +7,19 @@ import exception.DatabaseException;
 import exception.UnknowCompanyException;
 import model.Company;
 import persistance.CompanyDAO;
+import persistance.ComputerDAO;
 
 public class CompanyService {
 	
 	private CompanyDAO companyDAO;
+	private ComputerDAO computerDAO;
 	
 	private static CompanyService companyService;
 	
+	
 	public CompanyService () {
 		this.companyDAO = CompanyDAO.getInstance();
+		this.computerDAO = ComputerDAO.getInstance();
 	}
 	
 	public static CompanyService getInstance() {
@@ -32,4 +36,9 @@ public class CompanyService {
 	public Optional<Company> getCompanyById(long id) throws DatabaseException, UnknowCompanyException {
 		return companyDAO.getById(id);
 	}
+	
+	public boolean deleteCompanyById(long id) throws DatabaseException, UnknowCompanyException {
+		return companyDAO.deleteById(id, computerDAO);
+	}
+
 }

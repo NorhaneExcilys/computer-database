@@ -31,13 +31,14 @@ public class ComputerDAO {
 	
 	private final static String GET_COUNT = "SELECT COUNT(id) AS count FROM computer";
 	private final static String GET_COUNT_BY_SEARCHED_WORD = "SELECT COUNT(id) AS count FROM computer WHERE name LIKE ?;";	
-	private final static String GET_ALL = "SELECT id, name, introduced, discontinued, company_id  FROM computer;";
+	//private final static String GET_ALL = "SELECT id, name, introduced, discontinued, company_id  FROM computer;";
 	private final static String GET_BY_PAGE = "SELECT id, name, introduced, discontinued, company_id FROM computer LIMIT ? OFFSET ?;";
 	private final static String GET_BY_ID = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE id = ?;";
 	private final static String GET_BY_SEARCHED_WORD = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE name LIKE ?;";
 	private final static String ADD = "INSERT INTO computer (name, introduced, discontinued, company_id) VALUE (?, ?, ?, ?);";
 	private final static String UPDATE = "UPDATE computer SET name = ?, introduced = ?, discontinued = ?, company_id = ? WHERE id = ?;";
 	private final static String DELETE_BY_LIST = "DELETE FROM computer WHERE id IN (%s)";
+	private final static String DELETE_BY_COMPANY_ID = "DELETE FROM computer WHERE company_id = ?";
 	
 	private static ComputerDAO computerDAO;
 	private CompanyDAO companyDAO;
@@ -133,7 +134,7 @@ public class ComputerDAO {
 	 * @throws DatabaseException 
 	 * @throws UnknowCompanyException 
 	 */
-	public List<Computer> getAll() throws DatabaseException, UnknowCompanyException {
+	/*public List<Computer> getAll() throws DatabaseException, UnknowCompanyException {
 		List<Computer> allComputers = new ArrayList<Computer>();
 		
 		try (Connection connection = connectionDAO.getConnection()) {
@@ -152,7 +153,7 @@ public class ComputerDAO {
 		}
 
 		return allComputers;
-	}
+	}*/
 	
 	/**
 	 * return the computer chosen by identifier
@@ -268,6 +269,12 @@ public class ComputerDAO {
 			throw new DatabaseException("Impossible to delete computers" + e.getMessage());
 		}
 		return (queryResult == 1);
+	}
+	
+	public void deleteComputerByCompanyId(Connection connection, long idCompany) throws SQLException {
+		PreparedStatement preparedStatement = connection.prepareStatement(DELETE_BY_COMPANY_ID);
+		preparedStatement.setLong(1, idCompany);
+		preparedStatement.executeUpdate();
 	}
 	
 	/**

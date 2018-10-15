@@ -12,6 +12,7 @@ import exception.UnknowComputerException;
 import exception.UnknowMenuException;
 import model.Company;
 import model.Computer;
+import model.Paging;
 import service.CompanyService;
 import service.ComputerService;
 
@@ -65,6 +66,9 @@ public class UserInterface {
 		        	case DELETE_COMPUTER:
 		        		deleteComputer();
 		        		break;
+		        	case DELETE_COMPANY:
+		        		deleteCompany();
+		        		break;
 		        	case QUIT:
 		        		closeApplication();
 		                break;
@@ -90,7 +94,8 @@ public class UserInterface {
 		System.out.println("4 - Add a new computer");
 		System.out.println("5 - Update the information of a computer");
 		System.out.println("6 - Delete a computer from the database");
-		System.out.println("7 - Close application");
+		System.out.println("7 - Delete a company from the database");
+		System.out.println("8 - Close application");
 	}
 	
 	/**
@@ -99,7 +104,8 @@ public class UserInterface {
 	public void showComputers() {
 		List<Computer> computers = new ArrayList<Computer>();
 		try {
-			computers = computerService.getComputers();
+			
+			computers = computerService.getByPage(new Paging(10,10));
 			if (computers.size() > 0) {
 				computers.forEach((v) -> System.out.println(v));
 			}
@@ -198,6 +204,32 @@ public class UserInterface {
 		System.out.println("Computer number " + computerId + " is now deleted");
 	}
 	
+	public void deleteCompany() {
+		System.out.println("Please enter the number of the company you want to delete.");
+		
+		int companyId = -1;
+		boolean success = false;
+		
+		do {
+			String input = scanner.nextLine();
+			try {
+				companyId = Integer.parseInt(input);
+				if (companyId < 0) {
+					throw new NumberFormatException();
+				}
+				success = companyService.deleteCompanyById(companyId);
+			}
+			catch (NumberFormatException e) {
+				System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the company.");
+			} catch (DatabaseException e) {
+				e.printStackTrace();
+			} catch (UnknowCompanyException e) {
+				System.out.println(e.getMessage());
+			}
+		} while (!success);
+		
+		System.out.println("Company number " + companyId + " is now deleted");
+	}
 	/**
 	 * adds a computer
 	 */

@@ -4,7 +4,7 @@ import exception.UnknowMenuException;
 
 public enum MenuEnum {
 	
-	GET_COMPUTERS("1"), GET_COMPANIES("2"), GET_COMPUTER_BY_ID("3"), ADD_COMPUTER("4"), UPDATE_COMPUTER("5"), DELETE_COMPUTER("6"), QUIT("7"), HELP("help");
+	GET_COMPUTERS("1"), GET_COMPANIES("2"), GET_COMPUTER_BY_ID("3"), ADD_COMPUTER("4"), UPDATE_COMPUTER("5"), DELETE_COMPUTER("6"), DELETE_COMPANY("7"), QUIT("8"), HELP("help");
 
     final private String value; 
  
