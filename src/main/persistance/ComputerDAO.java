@@ -31,7 +31,6 @@ public class ComputerDAO {
 	
 	private final static String GET_COUNT = "SELECT COUNT(id) AS count FROM computer";
 	private final static String GET_COUNT_BY_SEARCHED_WORD = "SELECT COUNT(id) AS count FROM computer WHERE name LIKE ?;";	
-	//private final static String GET_ALL = "SELECT id, name, introduced, discontinued, company_id  FROM computer;";
 	private final static String GET_BY_PAGE = "SELECT id, name, introduced, discontinued, company_id FROM computer LIMIT ? OFFSET ?;";
 	private final static String GET_BY_ID = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE id = ?;";
 	private final static String GET_BY_SEARCHED_WORD = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE name LIKE ?;";
@@ -127,34 +126,7 @@ public class ComputerDAO {
 		}
 		return computers;
 	}
-	
-	/**
-	 * return the list of all computers in the database computer
-	 * @return the list of all computers
-	 * @throws DatabaseException 
-	 * @throws UnknowCompanyException 
-	 */
-	/*public List<Computer> getAll() throws DatabaseException, UnknowCompanyException {
-		List<Computer> allComputers = new ArrayList<Computer>();
-		
-		try (Connection connection = connectionDAO.getConnection()) {
-			ResultSet queryResult = connection.createStatement().executeQuery(GET_ALL);
-			while (queryResult.next()) {
-				int currentId = queryResult.getInt("id");
-				String currentName = queryResult.getString("name");
-				Optional<LocalDate> introducedDate = Optional.ofNullable(queryResult.getDate("introduced").toLocalDate());
-				Optional<LocalDate> discontinuedDate = Optional.ofNullable(queryResult.getDate("discontinued").toLocalDate());
-				long currentCompanyId = queryResult.getLong("company_id");
-				Computer currentComputer = new Computer.ComputerBuilder(currentName).id(currentId).introducedDate(introducedDate).discontinuedDate(discontinuedDate).company(currentCompanyId > 0 ? companyDAO.getById(currentCompanyId) : Optional.empty()).build();
-				allComputers.add(currentComputer);
-			}
-		} catch (SQLException e) {
-			throw new DatabaseException("Impossible to get computers" + e.getMessage());
-		}
 
-		return allComputers;
-	}*/
-	
 	/**
 	 * return the computer chosen by identifier
 	 * @param id the identifier of the computer

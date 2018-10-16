@@ -108,7 +108,7 @@ public class EditComputer extends HttpServlet {
 		} catch (IncorrectDateException e) {
 			logger.error(e.getMessage());
 		} catch (IntroducedAfterDiscontinuedException e) {
-			logger.error(e.getMessage());;
+			logger.error(e.getMessage());
 		} catch (IncorrectComputerDTOException e) {
 			logger.error(e.getMessage());
 		} catch (UnknowCompanyException e) {

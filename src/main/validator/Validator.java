@@ -25,14 +25,14 @@ public class Validator {
 		return isValidName(computerDTO.getName()) && introducedIsBeforeDiscontinued(computerDTO.getIntroducedDate(), computerDTO.getDiscontinuedDate(), format) && isValidId(computerDTO.getCompanyId());
 	}
 	
-	private boolean isValidName(String strName) throws IncorrectNameException {
+	protected boolean isValidName(String strName) throws IncorrectNameException {
 		if (!strName.trim().equals("")) {
 			return true;
 		}
 		throw new IncorrectNameException();
 	}
 	
-	private boolean isValidId(String strId) throws IncorrectIdException {
+	protected boolean isValidId(String strId) throws IncorrectIdException {
 		if (strId == null) {
 			return true;
 		}
@@ -62,7 +62,7 @@ public class Validator {
 		}
 	}
 	
-	private boolean introducedIsBeforeDiscontinued(String strIntroducedDate, String strDiscontinuedDate, String format) throws IncorrectDateException, IntroducedAfterDiscontinuedException {
+	protected boolean introducedIsBeforeDiscontinued(String strIntroducedDate, String strDiscontinuedDate, String format) throws IncorrectDateException, IntroducedAfterDiscontinuedException {
 		if (strIntroducedDate.equals("") || strDiscontinuedDate.equals("")) {
 			return true;
 		}
