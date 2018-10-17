@@ -33,11 +33,7 @@ public class ComputerDAO {
 	private final static String GET_COUNT_BY_SEARCHED_WORD = "SELECT COUNT(id) AS count FROM computer WHERE name LIKE ?;";	
 	private final static String GET_BY_PAGE = "SELECT id, name, introduced, discontinued, company_id FROM computer LIMIT ? OFFSET ?;";
 	private final static String GET_BY_ID = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE id = ?;";
-<<<<<<< HEAD:src/main/persistance/ComputerDAO.java
 	private final static String GET_BY_SEARCHED_WORD = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE name LIKE ?;";
-=======
-	private final static String SEARCH_ON_NAME = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE name LIKE '%?%'";
->>>>>>> master:src/persistance/ComputerDAO.java
 	private final static String ADD = "INSERT INTO computer (name, introduced, discontinued, company_id) VALUE (?, ?, ?, ?);";
 	private final static String UPDATE = "UPDATE computer SET name = ?, introduced = ?, discontinued = ?, company_id = ? WHERE id = ?;";
 	private final static String DELETE_BY_LIST = "DELETE FROM computer WHERE id IN (%s)";
@@ -178,24 +174,10 @@ public class ComputerDAO {
 		try (Connection connection = connectionDAO.getConnection()) {
 			PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_SEARCHED_WORD);
 			preparedStatement.setString(1, "%" + word + "%");
-=======
-	 * 
-	 * @param name
-	 * @return
-	 * @throws DatabaseException
-	 * @throws UnknowCompanyException 
-	 */
-	public List<Computer> searchOnName(String name) throws DatabaseException, UnknowCompanyException {
-		List<Computer> result = new ArrayList<Computer>();
-		try (Connection connection = dao.getConnection()) {
-			PreparedStatement preparedStatement = connection.prepareStatement(SEARCH_ON_NAME);
-			preparedStatement.setString(1, name);
->>>>>>> master:src/persistance/ComputerDAO.java
 			ResultSet queryResult = preparedStatement.executeQuery();
 			while (queryResult.next()) {
 				int currentId = queryResult.getInt("id");
 				String currentName = queryResult.getString("name");
-<<<<<<< HEAD:src/main/persistance/ComputerDAO.java
 				Optional<LocalDate> introducedDate = sqlDateToLocalDate(queryResult, "introduced");
 				Optional<LocalDate> discontinuedDate = sqlDateToLocalDate(queryResult, "discontinued");
 				int currentCompanyId = queryResult.getInt("company_id");
@@ -206,19 +188,6 @@ public class ComputerDAO {
 		}
 		
 		return searchedComputers;
-=======
-				Optional<LocalDate> introducedDate = stringToLocalDate(queryResult.getString("introduced"));
-				Optional<LocalDate> discontinuedDate = stringToLocalDate(queryResult.getString("discontinued"));
-				long currentCompanyId = queryResult.getLong("company_id");
-				Computer currentComputer = new Computer(currentId, currentName, introducedDate, discontinuedDate, currentCompanyId > 0 ? companyDAO.getById(currentCompanyId) : Optional.empty());
-				result.add(currentComputer);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new DatabaseException(e.getMessage());
-		}
-		return result;
->>>>>>> master:src/persistance/ComputerDAO.java
 	}
 	
 	/**
