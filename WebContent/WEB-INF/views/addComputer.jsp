@@ -39,11 +39,7 @@
                             <div class="form-group">
                                 <label for="companyId">Company</label>
                                 <select class="form-control" id="companyId" name="companyId" >
-<<<<<<< HEAD
                                 	<option disabled selected> -- select a company -- </option>
-=======
-                                	<option disabled selected value> -- select a company -- </option>
->>>>>>> master
                                 	<c:forEach items="${companies}" var="company">
                                     	<option value="${company.id}">${company.name}</option>
                                 	</c:forEach>

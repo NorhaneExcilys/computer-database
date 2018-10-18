@@ -39,7 +39,7 @@
             </div>
         </div>
 
-        <form id="deleteForm" action="DeleteComputer" method="POST">
+        <form id="deleteForm" action="Dashboard" method="POST">
             <input type="hidden" name="selection" value="">
         </form>
 
