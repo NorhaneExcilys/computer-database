@@ -25,8 +25,10 @@ public class UserInterface {
 	
 	@Autowired
 	private ComputerService computerService;
+	
 	@Autowired
 	private CompanyService companyService;
+	
 	private InputManager inputManager;
 
 	private Scanner scanner;
@@ -35,8 +37,6 @@ public class UserInterface {
 	 * builds a UserInterface and initialize the databaseService, computerService, companyService and scanner
 	 */
 	public UserInterface() {
-		//companyService = CompanyService.getInstance();
-		//computerService = ComputerService.getInstance();
 		scanner = new Scanner(System.in);
 		inputManager = new InputManager();
 	}

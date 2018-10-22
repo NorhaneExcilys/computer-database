@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"dto"},{"l":"exception"},{"l":"mapper"},{"l":"model"},{"l":"service"},{"l":"servlet"},{"l":"ui"},{"l":"validator"}]
+packageSearchIndex = [{"l":"com.excilys.config"},{"l":"com.excilys.dto"},{"l":"com.excilys.exception"},{"l":"com.excilys.mapper"},{"l":"com.excilys.model"},{"l":"com.excilys.persistance"},{"l":"com.excilys.service"},{"l":"com.excilys.servlet"},{"l":"com.excilys.ui"}]

@@ -32,8 +32,8 @@ public class ComputerService {
 		return computerDAO.getById(id);
 	}
 	
-	public List<Computer> getBySearchedWord(String word) throws DatabaseException, UnknowCompanyException {
-		return computerDAO.getBySearchedWord(word);
+	public List<Computer> getBySearchedWord(String word, Paging paging) throws DatabaseException, UnknowCompanyException {
+		return computerDAO.getBySearchedWord(word, paging);
 	}
 	
 	public boolean updateComputerById(Computer computer) throws DatabaseException, UnknowComputerException {

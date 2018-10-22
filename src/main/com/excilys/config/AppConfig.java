@@ -1,27 +1,31 @@
 package com.excilys.config;
 
+import javax.sql.DataSource;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.ViewResolver;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
-import org.springframework.web.servlet.view.JstlView;
 
-@EnableWebMvc
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 @Configuration
-public class AppConfig implements WebMvcConfigurer {
- 
-   @Bean
-   public ViewResolver viewResolver() {
-      InternalResourceViewResolver bean = new InternalResourceViewResolver();
- 
-      bean.setViewClass(JstlView.class);
-      bean.setPrefix("/WEB-INF/views/");
-      bean.setSuffix(".jsp");
- 
-      return bean;
-   }
+@ComponentScan(basePackages="com.excilys")
+@EnableWebMvc
+public class AppConfig {
+	
+	@Bean
+    public DataSource getDataSource() {
+		HikariConfig hikariConfig = new HikariConfig("/home/elgharbi/eclipse-workspace/ComputerDatabase/datasource.properties");
+		HikariDataSource hikariDataSource = new HikariDataSource(hikariConfig);
+        return hikariDataSource;
+    }    
+	
+    @Bean
+    public PlatformTransactionManager getTransactionManager() {
+        return new DataSourceTransactionManager(getDataSource());
+    }
 }

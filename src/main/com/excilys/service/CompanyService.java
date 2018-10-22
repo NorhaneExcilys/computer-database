@@ -18,9 +18,6 @@ public class CompanyService {
 	@Autowired
 	private CompanyDAO companyDAO;
 	
-	@Autowired
-	private ComputerDAO computerDAO;
-	
 	public List<Company> getCompanies() throws DatabaseException {
 		return companyDAO.getAll();
 	}
@@ -30,7 +27,7 @@ public class CompanyService {
 	}
 	
 	public boolean deleteCompanyById(long id) throws DatabaseException, UnknowCompanyException {
-		return companyDAO.deleteById(id, computerDAO);
+		return companyDAO.deleteById(id);
 	}
 
 }

@@ -20,7 +20,6 @@ import com.excilys.service.ComputerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import com.excilys.exception.UnknowComputerException;
@@ -98,7 +97,7 @@ public class Dashboard extends HttpServlet {
 			if (searchedWord.isPresent()) {
 				currentPaging.setComputersPerPage(DEFAULT_COMPUTERS_PER_PAGE);
 				currentPaging.setCurrentPage(DEFAULT_CURRENT_PAGE);
-				computers = computerService.getBySearchedWord(searchedWord.get());
+				computers = computerService.getBySearchedWord(searchedWord.get(), currentPaging);
 			}
 			else {
 				computers = computerService.getByPage(currentPaging);

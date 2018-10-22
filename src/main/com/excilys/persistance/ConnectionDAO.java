@@ -15,7 +15,6 @@ import com.excilys.exception.DatabaseException;
  * A ConnectionDAO is characterized by the following informations:
  * an hikariConfig
  * an hikariDataSource
- * a connectionDAO
  * @author elgharbi
  *
  */

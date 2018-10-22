@@ -30,8 +30,6 @@ public class InputManager {
 	private Scanner scanner;
 	
 	public InputManager() {
-		//companyService = CompanyService.getInstance();
-		//computerService = ComputerService.getInstance();
 		scanner = new Scanner(System.in);
 	}
 	

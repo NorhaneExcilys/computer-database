@@ -41,6 +41,7 @@
     <HikariCP.version>3.2.0</HikariCP.version>
     <jstl.version>1.2</jstl.version>
     <spring-webmvc.version>5.0.8.RELEASE</spring-webmvc.version>
+    <spring-jdbc.version>5.0.8.RELEASE</spring-jdbc.version>
   </properties>
         
   <dependencies>
@@ -114,6 +115,13 @@
 	    <artifactId>spring-webmvc</artifactId>
 	    <version>${spring-webmvc.version}</version>
 	</dependency>
+	
+	<dependency>
+	    <groupId>org.springframework</groupId>
+	    <artifactId>spring-jdbc</artifactId>
+	    <version>${spring-jdbc.version}</version>
+	</dependency>
+	
 	
   </dependencies>
 </project>
