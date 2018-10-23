@@ -258,7 +258,28 @@ public class UserInterface {
 		// Company Id
 		System.out.println("Please enter the company identifier of your computer.\n"
 				+ "If you don't want to enter this identifier, please press button ENTER.");
-		Optional<Company> company = inputManager.askCompany();
+		
+		Optional<Company> company = Optional.empty();
+		boolean correctCompanyId = false;
+		do {
+			Optional<Long> companyId = inputManager.askCompanyId();
+			if (companyId.isPresent()) {
+				try {
+					company = companyService.getCompanyById(companyId.get());
+				} catch (DatabaseException e) {
+					e.printStackTrace();
+				} catch (UnknowCompanyException e) {
+					System.out.println("This identifier is unknow, please, enter a correct identifier of a company.");
+					e.printStackTrace();
+				}
+				if (company.isPresent()) {
+					correctCompanyId = true;
+				}
+			}
+			else {
+				correctCompanyId = true;
+			}
+		} while (!correctCompanyId);
 		
 		Computer computer;
 		boolean success = false;
@@ -280,7 +301,23 @@ public class UserInterface {
 	public void updateComputerInformations() {
 		System.out.println("Please enter the number of the computer you want to update.");
 		
-		Optional<Computer> computer = inputManager.askComputer();
+		
+		Optional<Computer> computer = Optional.empty();
+		do {
+			long computerId = inputManager.askComputerId();
+			try {
+				computer = computerService.getById(computerId);
+			} catch (DatabaseException e) {
+				e.printStackTrace();
+			} catch (UnknowComputerException e) {
+				e.printStackTrace();
+			} catch (UnknowCompanyException e) {
+				e.printStackTrace();
+			}
+			if (!computer.isPresent()) {
+				System.out.println("This identifier is unknow, please, enter a correct identifier of a computer.");
+			}
+		} while (!computer.isPresent());
 		
 		Computer currentComputer = computer.get();
 		long currentId = currentComputer.getId();
@@ -318,7 +355,27 @@ public class UserInterface {
 		YesOrNoEnum changeCompanyId = inputManager.getYesOrNo("Do you want to change this company? Enter yes or no.");
 		if (changeCompanyId == YesOrNoEnum.YES) {
 			System.out.println("Please enter the new company identifier of the computer.");
-			currentCompany = inputManager.askCompany();
+			currentCompany = Optional.empty();
+			boolean correctCompanyId = false;
+			do {
+				Optional<Long> companyId = inputManager.askCompanyId();
+				if (companyId.isPresent()) {
+					try {
+						currentCompany = companyService.getCompanyById(companyId.get());
+					} catch (DatabaseException e) {
+						e.printStackTrace();
+					} catch (UnknowCompanyException e) {
+						System.out.println("This identifier is unknow, please, enter a correct identifier of a company.");
+						e.printStackTrace();
+					}
+					if (currentCompany.isPresent()) {
+						correctCompanyId = true;
+					}
+				}
+				else {
+					correctCompanyId = true;
+				}
+			} while (!correctCompanyId);
 		}
 		Computer updatedComputer = new Computer.ComputerBuilder(currentName).id(currentId).introducedDate(currentIntroducedDate).discontinuedDate(currentDiscontinuedDate).company(currentCompany).build();
 		boolean success;

@@ -155,7 +155,7 @@ public class ComputerDAO {
 		if (queryResult < 1) {
 			throw new UnknowComputerException();
 		}
-		return (queryResult >= 0);
+		return (queryResult == idList.split(",").length);
 	}
 
 	/**

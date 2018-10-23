@@ -6,27 +6,15 @@ import java.time.format.DateTimeParseException;
 import java.util.Optional;
 import java.util.Scanner;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.excilys.exception.UnknowComputerException;
 import com.excilys.exception.UnknowYesOrNoException;
-import com.excilys.model.Computer;
 
-import com.excilys.exception.DatabaseException;
 import com.excilys.exception.IncorrectNameException;
-import com.excilys.exception.UnknowCompanyException;
-import com.excilys.model.Company;
-import com.excilys.service.CompanyService;
-import com.excilys.service.ComputerService;
 
 @Component
 public class InputManager {
 	
-	@Autowired
-	private ComputerService computerService;
-	@Autowired
-	private CompanyService companyService;
 	private Scanner scanner;
 	
 	public InputManager() {
@@ -51,44 +39,53 @@ public class InputManager {
 		return computerName;
 	}
 	
-	public Optional<Company> askCompany() {
-		int companyId = -1;
-		Optional<Company> company = Optional.empty();
+	
+	public Optional<Long> askCompanyId() {
+		Optional<Long> companyId = Optional.empty();
 		boolean correctCompanyId = false;
 		do {
 			String strCompanyId = scanner.nextLine();
 			if (strCompanyId.equals("")) {
-				company = Optional.empty();
+				companyId = Optional.empty();
 				correctCompanyId = true;
 			}
 			else {
 				try {
-					companyId = Integer.parseInt(strCompanyId);
-					if (companyId < 0) {
+					companyId = Optional.of(Long.parseLong(strCompanyId));
+					if (companyId.get() < 0) {
 						throw new NumberFormatException();
 					}
 					else {
-						company = companyService.getCompanyById(companyId);
-						if (!company.isPresent()) {
-							throw new UnknowCompanyException();
-						}
-						else {
-							correctCompanyId = true;
-						}
+						correctCompanyId = true;
 					}
 				}
 				catch (NumberFormatException e) {
 					System.out.println("This is an incorrect number. Please, enter the number of the identifier of the company.");
 				}
-				catch (UnknowCompanyException e) {
-					System.out.println(e.getMessage());
-				}
-				catch (DatabaseException e) {
-					System.out.println(e.getMessage());
-				}
 			}
 		} while (!correctCompanyId);
-		return company;
+		return companyId;
+	}
+	
+	public long askComputerId() {
+		long computerId = -1;
+		boolean correctComputerId = false;
+		do {
+			String input = scanner.nextLine();
+			try {
+				computerId = Long.parseLong(input);
+				if (computerId < 0) {
+					throw new NumberFormatException();
+				}
+				else {
+					correctComputerId = true;
+				}
+			}
+			catch (NumberFormatException e) {
+				System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the computer.");
+			}
+		} while (!correctComputerId);
+		return computerId;
 	}
 	
 	public Optional<LocalDate> askDate() {
@@ -115,34 +112,7 @@ public class InputManager {
 		return date;
 	}
 	
-	public Optional<Computer> askComputer() {
-		Optional<Computer> computer = Optional.empty();
-		do {
-			String input = scanner.nextLine();
-			try {
-				long computerId = Long.parseLong(input);
-				if (computerId < 0) {
-					throw new NumberFormatException();
-				}
-				else {
-					computer = computerService.getById(computerId);
-					if (!computer.isPresent()) {
-						throw new UnknowComputerException();
-					}
-				}
-			}
-			catch (NumberFormatException e) {
-				System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the computer.");
-			} catch (DatabaseException e) {
-				System.out.println(e.getMessage());
-			} catch (UnknowComputerException e) {
-				System.out.println(e.getMessage());
-			} catch (UnknowCompanyException e) {
-				System.out.println(e.getMessage());
-			}
-		} while (!computer.isPresent());
-		return computer;
-	}
+
 	
 	public YesOrNoEnum getYesOrNo (String question) {
 		System.out.println(question);

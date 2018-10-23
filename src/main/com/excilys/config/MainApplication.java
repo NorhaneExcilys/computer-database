@@ -12,7 +12,8 @@ public class MainApplication implements WebApplicationInitializer {
 	@Override
     public void onStartup(final ServletContext sc) throws ServletException {
         AnnotationConfigWebApplicationContext root = new AnnotationConfigWebApplicationContext();
-        root.scan("com.excilys");
+        //root.scan("com.excilys");
+        root.register(AppConfig.class);
         sc.addListener(new ContextLoaderListener(root));
     }
 }

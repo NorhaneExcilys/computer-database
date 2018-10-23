@@ -13,7 +13,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
-@ComponentScan(basePackages="com.excilys")
+@ComponentScan(basePackages= {"com.excilys.config", "com.excilys.mapper", "com.excilys.persistance", "com.excilys.service", "com.excilys.servlet", "com.excilys.ui", "com.excilys.validator"})
 @EnableWebMvc
 public class AppConfig {
 	

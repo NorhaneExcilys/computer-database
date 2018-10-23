@@ -128,14 +128,16 @@ public class Dashboard extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String computerToDelete = request.getParameter("selection");
 		
-		try {
-			computerService.deleteComputerByList(computerToDelete);
-		} catch (DatabaseException e) {
-			logger.error(e.getMessage());
-		} catch (UnknowComputerException e) {
-			logger.error("Unknow computer");
+		if (computerToDelete != "") {
+			try {
+				computerService.deleteComputerByList(computerToDelete);
+			} catch (DatabaseException e) {
+				logger.error(e.getMessage());
+			} catch (UnknowComputerException e) {
+				logger.error("Unknow computer");
+			}
 		}
-		
+
 		doGet(request, response);
 	}
 

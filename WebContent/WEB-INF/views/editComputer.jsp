@@ -24,7 +24,9 @@
                         id: ${id}
                     </div>
                     <h1>Edit Computer</h1>
-
+                    <div class="alert alert-danger" role="alert" style="display:none;">
+  						The computer name must be completed.
+					</div>
                     <form action="EditComputer" method="POST">
                         <input type="hidden" name="id" value="${id}" id="id"/> <!-- TODO: Change this value with the computer id -->
                         <fieldset>
