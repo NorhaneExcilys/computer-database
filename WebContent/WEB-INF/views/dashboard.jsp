@@ -7,14 +7,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta charset="utf-8">
 <!-- Bootstrap -->
-<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
-<link href="css/font-awesome.css" rel="stylesheet" media="screen">
-<link href="css/main.css" rel="stylesheet" media="screen">
+<link href="resources/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="resources/css/font-awesome.css" rel="stylesheet" media="screen">
+<link href="resources/css/main.css" rel="stylesheet" media="screen">
 </head>
 <body>
     <header class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="Dashboard"> Application - Computer Database </a>
+            <a class="navbar-brand" href="dashboard"> Application - Computer Database </a>
         </div>
     </header>
 
@@ -33,13 +33,13 @@
                     </form>
                 </div>
                 <div class="pull-right">
-                    <a class="btn btn-success" id="addComputer" href="AddComputer">Add Computer</a>
+                    <a class="btn btn-success" id="addComputer" href="addComputer">Add Computer</a>
                     <a class="btn btn-default" id="editComputer" href="#" onclick="$.fn.toggleEditMode();">Edit</a>
                 </div>
             </div>
         </div>
 
-        <form id="deleteForm" action="Dashboard" method="POST">
+        <form id="deleteForm" action="deleteComputer" method="POST">
             <input type="hidden" name="selection" value="">
         </form>
 
@@ -83,7 +83,7 @@
 	                            <input type="checkbox" name="cb" class="cb" value="${computer.id}">
 	                        </td>
 	                        <td>
-	                            <a href="EditComputer?id=${computer.id}" onclick="">${computer.name}</a>
+	                            <a href="editComputer?id=${computer.id}" onclick="">${computer.name}</a>
 	                        </td>
 	                        <td>${computer.introducedDate}</td>
 	                        <td>${computer.discontinuedDate}</td>
@@ -99,32 +99,32 @@
         <div class="container text-center">
             <ul class="pagination">
                 <li>
-                	<a href="Dashboard?computersPerPage=${computersPerPage}&currentPage=1" aria-label="Previous">
+                	<a href="dashboard?computersPerPage=${computersPerPage}&currentPage=1" aria-label="Previous">
                     	<span aria-hidden="true">&laquo;</span>
                 	</a>
               	</li>
               	<c:forEach begin="${pageMin}" end="${pageMax}" var="page">
-              		<li><a href="Dashboard?computersPerPage=${computersPerPage}&currentPage=${page}">${page}</a></li>
+              		<li><a href="dashboard?computersPerPage=${computersPerPage}&currentPage=${page}">${page}</a></li>
               	</c:forEach>
               	<li>
-                	<a href="Dashboard?computersPerPage=${computersPerPage}&currentPage=${totalPage}" aria-label="Next">
+                	<a href="dashboard?computersPerPage=${computersPerPage}&currentPage=${totalPage}" aria-label="Next">
                     	<span aria-hidden="true">&raquo;</span>
                 	</a>
             	</li>
         	</ul>
 
 	        <div class="btn-group btn-group-sm pull-right" role="group" >
-	            <button type="button" class="btn btn-default" onclick="location.href='Dashboard?computersPerPage=10&currentPage=1'">10</button>
-	            <button type="button" class="btn btn-default" onclick="location.href='Dashboard?computersPerPage=50&currentPage=1'">50</button>
-	            <button type="button" class="btn btn-default" onclick="location.href='Dashboard?computersPerPage=100&currentPage=1'">100</button>
+	            <button type="button" class="btn btn-default" onclick="location.href='dashboard?computersPerPage=10&currentPage=1'">10</button>
+	            <button type="button" class="btn btn-default" onclick="location.href='dashboard?computersPerPage=50&currentPage=1'">50</button>
+	            <button type="button" class="btn btn-default" onclick="location.href='dashboard?computersPerPage=100&currentPage=1'">100</button>
 	        </div>
 	        
         </div>
 
     </footer>
-<script src="js/jquery.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/dashboard.js"></script>
+<script src="resources/js/jquery.min.js"></script>
+<script src="resources/js/bootstrap.min.js"></script>
+<script src="resources/js/dashboard.js"></script>
 
 </body>
 </html>
