@@ -46,7 +46,6 @@ public class ComputerController {
 	private ComputerMapper computerMapper;
 	private CompanyService companyService;
 	
-	private List<ComputerDTO> computersDTO;
 	private Paging currentPaging;
 	private int totalPage;
 	private int totalComputers;
@@ -58,7 +57,6 @@ public class ComputerController {
 		this.computerMapper = computerMapper;
 		this.companyService = companyService;
 		
-		computersDTO = new ArrayList<ComputerDTO>();
 		currentPaging = new Paging(DEFAULT_COMPUTERS_PER_PAGE, DEFAULT_CURRENT_PAGE);
 		totalPage = 0;
 		totalComputers = 0;
@@ -92,9 +90,9 @@ public class ComputerController {
 			logger.error(e.getMessage());
 		}
 
+		List<ComputerDTO> computersDTO = new ArrayList<ComputerDTO>();
 		try {
 			List<Computer> computers = new ArrayList<Computer>();
-			computersDTO.clear();
 			if (searchedWord.isPresent()) {
 				currentPaging.setComputersPerPage(DEFAULT_COMPUTERS_PER_PAGE);
 				currentPaging.setCurrentPage(DEFAULT_CURRENT_PAGE);

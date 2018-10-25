@@ -33,6 +33,9 @@ public class UserInterface {
 
 	private Scanner scanner;
 	
+	private final static int DEFAULT_COMPUTERS_PER_PAGE = 50;
+	private final static int DEFAULT_CURRENT_PAGE = 1;
+	
 	/**
 	 * builds a UserInterface and initialize the databaseService, computerService, companyService and scanner
 	 */
@@ -112,7 +115,7 @@ public class UserInterface {
 		List<Computer> computers = new ArrayList<Computer>();
 		try {
 			
-			computers = computerService.getByPage(new Paging(10,10));
+			computers = computerService.getByPage(new Paging(DEFAULT_COMPUTERS_PER_PAGE, DEFAULT_CURRENT_PAGE));
 			if (computers.size() > 0) {
 				computers.forEach((v) -> System.out.println(v));
 			}
