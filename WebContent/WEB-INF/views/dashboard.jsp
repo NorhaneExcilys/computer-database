@@ -1,9 +1,10 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jstl/fmt" prefix="fmt"%>
 
 <!DOCTYPE html>
 <html>
 <head>
-<title>Computer Database</title>
+<title><fmt:message key="label.computerDatabase" /></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta charset="utf-8">
 <!-- Bootstrap -->
@@ -14,27 +15,31 @@
 <body>
     <header class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="dashboard"> Application - Computer Database </a>
+            <a class="navbar-brand" href="dashboard"><fmt:message key="label.title" /></a>
+	        <div class="navbar-brand pull-right">
+	        	<a href="?lang=fr">FR</a>
+	            <a href="?lang=en">EN</a>
+			</div>
         </div>
     </header>
 
     <section id="main">
         <div class="container">
             <h1 id="homeTitle">
-                ${computerNumber} Computers found
+                ${computerNumber} <fmt:message key="label.computersfound" />
             </h1>
             <div id="actions" class="form-horizontal">
                 <div class="pull-left">
                     <form id="searchForm" action=# method="GET" class="form-inline">
 
-                        <input type="search" id="searchbox" name="search" class="form-control" placeholder="Search name" value="${search}" />
-                        <input type="submit" id="searchsubmit" value="Filter by name"
+                        <input type="search" id="searchbox" name="search" class="form-control" placeholder="<fmt:message key="label.search" />" value="${search}" />
+                        <input type="submit" id="searchsubmit" value="<fmt:message key="label.filter" />"
                         class="btn btn-primary" />
                     </form>
                 </div>
                 <div class="pull-right">
-                    <a class="btn btn-success" id="addComputer" href="addComputer">Add Computer</a>
-                    <a class="btn btn-default" id="editComputer" href="#" onclick="$.fn.toggleEditMode();">Edit</a>
+                    <a class="btn btn-success" id="addComputer" href="addComputer"><fmt:message key="label.addComputer" /></a>
+                    <a class="btn btn-default" id="editComputer" href="#" onclick="$.fn.toggleEditMode();"><fmt:message key="label.edit" /></a>
                 </div>
             </div>
         </div>
@@ -59,18 +64,18 @@
                             </span>
                         </th>
                         <th>
-                            Computer name
+                        	<fmt:message key="label.computerName" />
                         </th>
                         <th>
-                            Introduced date
+                        	<fmt:message key="label.introducedDate" />
                         </th>
                         <!-- Table header for Discontinued Date -->
                         <th>
-                            Discontinued date
+                        	<fmt:message key="label.discontinuedDate" />
                         </th>
                         <!-- Table header for Company -->
                         <th>
-                            Company
+                        	<fmt:message key="label.company" />
                         </th>
 
                     </tr>
