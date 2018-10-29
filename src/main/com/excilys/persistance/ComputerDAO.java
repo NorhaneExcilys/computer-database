@@ -1,12 +1,14 @@
 package com.excilys.persistance;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -57,7 +59,12 @@ public class ComputerDAO {
 	 * @throws DatabaseException
 	 */
 	public int getCount() throws DatabaseException {
-		return jdbcTemplate.queryForObject(GET_COUNT, Integer.class);
+		try {
+			return jdbcTemplate.queryForObject(GET_COUNT, Integer.class);
+		}
+		catch (DataAccessException e) {
+			throw new DatabaseException(e.getMessage());
+		}
 	}
 	
 	/**
@@ -67,7 +74,12 @@ public class ComputerDAO {
 	 * @throws DatabaseException
 	 */
 	public int getCountBySearchedWord(String word) throws DatabaseException {
-		return jdbcTemplate.queryForObject(GET_COUNT_BY_SEARCHED_WORD, Integer.class, "%" + word + "%");
+		try {
+			return jdbcTemplate.queryForObject(GET_COUNT_BY_SEARCHED_WORD, Integer.class, "%" + word + "%");
+		}
+		catch (DataAccessException e) {
+			throw new DatabaseException(e.getMessage());
+		}
 	}
 	
 	/**
@@ -77,25 +89,32 @@ public class ComputerDAO {
 	 * @throws DatabaseException
 	 * @throws UnknowCompanyException
 	 */
-	public List<Computer> getByPage(Paging paging) throws DatabaseException, UnknowCompanyException {
+	public List<Computer> getByPage(Paging paging) throws DatabaseException {
 		Object[] sqlParameter = {
 				paging.getComputersPerPage(),
 				paging.getComputersPerPage() * (paging.getCurrentPage()-1)
 		};
-		
-		return jdbcTemplate.query(GET_BY_PAGE, sqlParameter, computerRowMapper);
+		try {
+			return jdbcTemplate.query(GET_BY_PAGE, sqlParameter, computerRowMapper);
+		} catch (DataAccessException e) {
+			throw new DatabaseException(e.getMessage());
+		}
 	}
 
 	/**
 	 * return the computer chosen by identifier
 	 * @param id the identifier of the computer
 	 * @return the computer chosen by identifier
-	 * @throws DatabaseException 
-	 * @throws UnknowComputerException 
-	 * @throws UnknowCompanyException 
+	 * @throws DatabaseException
 	 */
-	public Optional<Computer> getById(long id) throws DatabaseException, UnknowComputerException, UnknowCompanyException {
-		List<Computer> computers = jdbcTemplate.query(GET_BY_ID, computerRowMapper, id);
+	public Optional<Computer> getById(long id) throws DatabaseException {
+		List<Computer> computers = new ArrayList<Computer>();
+		try {
+			computers = jdbcTemplate.query(GET_BY_ID, computerRowMapper, id);
+		} catch (DataAccessException e) {
+			throw new DatabaseException(e.getMessage());
+		}
+		
 		if (computers.size() == 0) {
 			return Optional.empty();
 		}
@@ -110,14 +129,18 @@ public class ComputerDAO {
 	 * @throws DatabaseException
 	 * @throws UnknowCompanyException
 	 */
-	public List<Computer> getBySearchedWord(String word, Paging paging) throws DatabaseException, UnknowCompanyException {
+	public List<Computer> getBySearchedWord(String word, Paging paging) throws DatabaseException {
 		Object[] sqlParameter = {
 				"%" + word + "%",
 				paging.getComputersPerPage(),
 				paging.getComputersPerPage() * (paging.getCurrentPage()-1)
 		};
 		
-		return jdbcTemplate.query(GET_BY_SEARCHED_WORD, sqlParameter, computerRowMapper);
+		try {	
+			return jdbcTemplate.query(GET_BY_SEARCHED_WORD, sqlParameter, computerRowMapper);
+		} catch (DataAccessException e) {
+			throw new DatabaseException(e.getMessage());
+		}
 	}
 	
 	/**
@@ -139,8 +162,12 @@ public class ComputerDAO {
 				company.isPresent() ? company.get().getId() : null
 		};
 		
-		int queryResult = jdbcTemplate.update(ADD, sqlParameter);
-		return (queryResult == 1);
+		try {	
+			int queryResult = jdbcTemplate.update(ADD, sqlParameter);
+			return (queryResult == 1);
+		} catch (DataAccessException e) {
+			throw new DatabaseException(e.getMessage());
+		}
 	}
 	
 	/**
@@ -151,11 +178,15 @@ public class ComputerDAO {
 	 * @throws UnknowComputerException 
 	 */
 	public boolean deleteComputerByList(String idList) throws DatabaseException, UnknowComputerException {
-		int queryResult = jdbcTemplate.update(String.format(DELETE_BY_LIST, idList));
-		if (queryResult < 1) {
-			throw new UnknowComputerException();
+		try {
+			int queryResult = jdbcTemplate.update(String.format(DELETE_BY_LIST, idList));
+			if (queryResult < 1) {
+				throw new UnknowComputerException();
+			}
+			return (queryResult == idList.split(",").length);
+		} catch (DataAccessException e) {
+			throw new DatabaseException(e.getMessage());
 		}
-		return (queryResult == idList.split(",").length);
 	}
 
 	/**
@@ -179,11 +210,15 @@ public class ComputerDAO {
 				id
 		};
 		
-		int queryResult = jdbcTemplate.update(UPDATE, sqlParameter);
-		if (queryResult < 1) {
-			throw new UnknowComputerException();
+		try {
+			int queryResult = jdbcTemplate.update(UPDATE, sqlParameter);
+			if (queryResult < 1) {
+				throw new UnknowComputerException();
+			}
+			return (queryResult == 1);
+		} catch (DataAccessException e) {
+			throw new DatabaseException(e.getMessage());
 		}
-		return (queryResult == 1);
 	}
 	
 }

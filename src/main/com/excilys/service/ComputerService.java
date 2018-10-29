@@ -28,7 +28,7 @@ public class ComputerService {
 		return computerDAO.getByPage(paging);
 	}
 	
-	public Optional<Computer> getById(long id) throws DatabaseException, UnknowComputerException, UnknowCompanyException {
+	public Optional<Computer> getById(long id) throws DatabaseException {
 		return computerDAO.getById(id);
 	}
 	

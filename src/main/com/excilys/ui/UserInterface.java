@@ -172,11 +172,6 @@ public class UserInterface {
 			} catch (DatabaseException e) {
 				System.out.println(e.getMessage());
 				e.printStackTrace();
-			} catch (UnknowComputerException e) {
-				System.out.println(e.getMessage());
-			} catch (UnknowCompanyException e) {
-				System.out.println(e.getMessage());
-				e.printStackTrace();
 			}
 		} while (!computer.isPresent());
 		
@@ -233,8 +228,6 @@ public class UserInterface {
 				System.out.println("This is an incorrect number. Please, enter the number of the identifiant of the company.");
 			} catch (DatabaseException e) {
 				e.printStackTrace();
-			} catch (UnknowCompanyException e) {
-				System.out.println(e.getMessage());
 			}
 		} while (!success);
 		
@@ -270,9 +263,6 @@ public class UserInterface {
 				try {
 					company = companyService.getCompanyById(companyId.get());
 				} catch (DatabaseException e) {
-					e.printStackTrace();
-				} catch (UnknowCompanyException e) {
-					System.out.println("This identifier is unknow, please, enter a correct identifier of a company.");
 					e.printStackTrace();
 				}
 				if (company.isPresent()) {
@@ -311,10 +301,6 @@ public class UserInterface {
 			try {
 				computer = computerService.getById(computerId);
 			} catch (DatabaseException e) {
-				e.printStackTrace();
-			} catch (UnknowComputerException e) {
-				e.printStackTrace();
-			} catch (UnknowCompanyException e) {
 				e.printStackTrace();
 			}
 			if (!computer.isPresent()) {
@@ -366,9 +352,6 @@ public class UserInterface {
 					try {
 						currentCompany = companyService.getCompanyById(companyId.get());
 					} catch (DatabaseException e) {
-						e.printStackTrace();
-					} catch (UnknowCompanyException e) {
-						System.out.println("This identifier is unknow, please, enter a correct identifier of a company.");
 						e.printStackTrace();
 					}
 					if (currentCompany.isPresent()) {

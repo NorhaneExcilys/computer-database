@@ -10,7 +10,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import com.excilys.exception.DatabaseException;
-import com.excilys.exception.UnknowCompanyException;
 import com.excilys.model.Company;
 import com.excilys.model.Computer;
 
@@ -31,8 +30,6 @@ public class ComputerRowMapper implements RowMapper<Computer> {
 		try {
 			company = currentCompanyId > 0 ? companyDAO.getById(currentCompanyId) : Optional.empty();
 		} catch (DatabaseException e) {
-			throw new SQLException();
-		} catch (UnknowCompanyException e) {
 			throw new SQLException();
 		}
 		Computer computer = new Computer.ComputerBuilder(currentName).id(currentId).introducedDate(introducedDate).discontinuedDate(discontinuedDate).company(company).build();

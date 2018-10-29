@@ -30,8 +30,6 @@ import com.excilys.model.Paging;
 import com.excilys.service.CompanyService;
 import com.excilys.service.ComputerService;
 
-
-
 @Controller
 @RequestMapping
 public class ComputerController {
@@ -62,6 +60,10 @@ public class ComputerController {
 		totalComputers = 0;
 	}
 	
+	@GetMapping("*")
+	public String get404() {
+		return "404";
+	}
 	
 	@GetMapping("/dashboard")
     public String getDashboard(final ModelMap pModel,
@@ -88,6 +90,7 @@ public class ComputerController {
 			}
 		} catch (DatabaseException e) {
 			logger.error(e.getMessage());
+			return "500";
 		}
 
 		List<ComputerDTO> computersDTO = new ArrayList<ComputerDTO>();
@@ -107,6 +110,7 @@ public class ComputerController {
 			}	
 		} catch (DatabaseException e) {
 			logger.error(e.getMessage());
+			return "500";
 		} catch (UnknowCompanyException e) {
 			logger.error("Unknow company");
 		}
@@ -133,6 +137,7 @@ public class ComputerController {
 			companies = companyService.getCompanies();
 		} catch (DatabaseException e) {
 			e.printStackTrace();
+			return "500";
 		}
 		pModel.addAttribute("companies", companies);
 		
@@ -141,29 +146,36 @@ public class ComputerController {
 	
 	@PostMapping("/addComputer")
 	public String addComputer(final ModelMap pModel,
-			@RequestParam(required = true) String computerName,
+			@RequestParam(required = true, value="computerName") String strName,
 			@RequestParam(required = false, value="introduced") String strIntroducedDate,
 			@RequestParam(required = false, value="discontinued") String strDiscontinuedDate,
 			@RequestParam(required = false, value="companyId") String strCompanyId) {
-		
-		ComputerDTO computerDTO = new ComputerDTO.ComputerDTOBuilder(computerName).introducedDate(strIntroducedDate).discontinuedDate(strDiscontinuedDate).companyId(strCompanyId).build();
 
+		boolean displayAlert = false;
+		String alertKey = "";
+		
+		ComputerDTO computerDTO = new ComputerDTO.ComputerDTOBuilder(strName).introducedDate(strIntroducedDate).discontinuedDate(strDiscontinuedDate).companyId(strCompanyId).build();
 		boolean computerAdded = false;
+		
 		try {
 			Computer computer = computerMapper.computerDTOToComputer(computerDTO, "yyyy-MM-dd");
 			computerAdded = computerService.addComputer(computer);
 		} catch (IncorrectNameException e) {
+			alertKey = "label.incorrectName";
 			logger.error(e.getMessage());
 		} catch (IncorrectIdException e) {
 			logger.error(e.getMessage());
 		} catch (IncorrectDateException e) {
+			alertKey = "label.incorrectDate";
 			logger.error(e.getMessage());
 		} catch (IntroducedAfterDiscontinuedException e) {
+			alertKey = "label.introducedBeforeDiscontinued";
 			logger.error(e.getMessage());
 		} catch (IncorrectComputerDTOException e) {
 			logger.error(e.getMessage());
 		} catch (DatabaseException e) {
 			logger.error(e.getMessage());
+			return "500";
 		} catch (UnknowCompanyException e) {
 			logger.error("Unknow company");
 		}
@@ -172,6 +184,22 @@ public class ComputerController {
 			return "redirect:dashboard";
 		}
 		else {
+			List<Company> companies = new ArrayList<Company>();
+			try {
+				companies = companyService.getCompanies();
+			} catch (DatabaseException e) {
+				logger.error(e.getMessage());
+				return "500";
+			}
+			
+			displayAlert = true;
+			pModel.addAttribute("name", strName);
+			pModel.addAttribute("introduced", strIntroducedDate);
+			pModel.addAttribute("discontinued", strDiscontinuedDate);
+			pModel.addAttribute("companyId", strCompanyId);
+			pModel.addAttribute("companies", companies);
+			pModel.addAttribute("alertKey", alertKey);
+			pModel.addAttribute("displayAlert", displayAlert);
 			return "addComputer";		
 		}
 
@@ -199,10 +227,7 @@ public class ComputerController {
 			}
 		} catch (DatabaseException e) {
 			logger.error(e.getMessage());
-		} catch (UnknowComputerException e) {
-			logger.error("Unknow computer");
-		} catch (UnknowCompanyException e) {
-			logger.error("Unknow company");
+			return "500";
 		}
 		
 		List<Company> companies = new ArrayList<Company>();
@@ -210,8 +235,10 @@ public class ComputerController {
 			companies = companyService.getCompanies();
 		} catch (DatabaseException e) {
 			logger.error(e.getMessage());
+			return "500";
 		}
 		
+		pModel.addAttribute("displayAlert", false);
 		pModel.addAttribute("companies", companies);
 		
 		return "editComputer";
@@ -227,6 +254,9 @@ public class ComputerController {
 			@RequestParam(required = false, value="companyId") String strCompanyId) {
 		long id = Long.parseLong(strId);
 		
+		boolean displayAlert = false;
+		String alertKey = "";
+		
 		ComputerDTO computerDTO = new ComputerDTO.ComputerDTOBuilder(strName).id(Long.toString(id)).introducedDate(strIntroducedDate).discontinuedDate(strDiscontinuedDate).companyId(strCompanyId).build();
 		
 		Computer computer;
@@ -235,12 +265,15 @@ public class ComputerController {
 			computer = computerMapper.computerDTOToComputer(computerDTO, "yyyy-MM-dd");
 			computerUpadated = computerService.updateComputerById(computer);
 		} catch (IncorrectNameException e) {
+			alertKey = "label.incorrectName";
 			logger.error(e.getMessage());
 		} catch (IncorrectIdException e) {
 			logger.error(e.getMessage());
 		} catch (IncorrectDateException e) {
+			alertKey = "label.incorrectDate";
 			logger.error(e.getMessage());
 		} catch (IntroducedAfterDiscontinuedException e) {
+			alertKey = "label.introducedBeforeDiscontinued";
 			logger.error(e.getMessage());
 		} catch (IncorrectComputerDTOException e) {
 			logger.error(e.getMessage());
@@ -248,15 +281,34 @@ public class ComputerController {
 			logger.error(e.getMessage());
 		} catch (DatabaseException e) {
 			logger.error(e.getMessage());
+			return "500";
 		} catch (UnknowComputerException e) {
 			logger.error("Unknow computer");
 		}
+		
 		
 		if (computerUpadated) {
 			return "redirect:dashboard";
 		}
 		else {
-			return "editComputer";		
+			List<Company> companies = new ArrayList<Company>();
+			try {
+				companies = companyService.getCompanies();
+			} catch (DatabaseException e) {
+				logger.error(e.getMessage());
+				return "500";
+			}
+			
+			displayAlert = true;
+			pModel.addAttribute("id", id);
+			pModel.addAttribute("name", strName);
+			pModel.addAttribute("introduced", strIntroducedDate);
+			pModel.addAttribute("discontinued", strDiscontinuedDate);
+			pModel.addAttribute("companyId", strCompanyId);
+			pModel.addAttribute("companies", companies);
+			pModel.addAttribute("alertKey", alertKey);
+			pModel.addAttribute("displayAlert", displayAlert);
+			return "editComputer";
 		}
 	}
 	
@@ -269,6 +321,7 @@ public class ComputerController {
 				computerService.deleteComputerByList(computerToDelete);
 			} catch (DatabaseException e) {
 				logger.error(e.getMessage());
+				return "500";
 			} catch (UnknowComputerException e) {
 				logger.error("Unknow computer");
 			}

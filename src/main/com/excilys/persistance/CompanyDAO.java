@@ -1,5 +1,6 @@
 package com.excilys.persistance;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,6 +9,7 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -59,7 +61,11 @@ public class CompanyDAO {
 	 * @throws DatabaseException 
 	 */
 	public List<Company> getAll() throws DatabaseException {
-		return jdbcTemplate.query(GET_ALL, companyRowMapper);
+		try {
+			return jdbcTemplate.query(GET_ALL, companyRowMapper);
+		} catch (DataAccessException e) {
+			throw new DatabaseException(e.getMessage());
+		}
 	}
 	
 	/**
@@ -67,10 +73,15 @@ public class CompanyDAO {
 	 * @param id the identifier of the company
 	 * @return the company chosen by identifier
 	 * @throws DatabaseException 
-	 * @throws UnknowCompanyException 
 	 */
-	public Optional<Company> getById(long id) throws DatabaseException, UnknowCompanyException {
-		List<Company> companies = jdbcTemplate.query(GET_BY_ID, companyRowMapper, id);
+	public Optional<Company> getById(long id) throws DatabaseException {
+		List<Company> companies = new ArrayList<Company>();
+		try {
+			companies = jdbcTemplate.query(GET_BY_ID, companyRowMapper, id);
+		} catch (DataAccessException e) {
+			throw new DatabaseException(e.getMessage());
+		}
+		
 		if (companies.size() == 0) {
 			return Optional.empty();
 		}
@@ -83,20 +94,23 @@ public class CompanyDAO {
 	 * @param id the identifier of the company to delete
 	 * @return true if the company is well deleted, false otherwise
 	 * @throws DatabaseException
-	 * @throws UnknowCompanyException
 	 */
-	public boolean deleteById(long id) throws DatabaseException, UnknowCompanyException {
-		int queryResult = transactionTemplate.execute(new TransactionCallback<Integer>() {
-			@Override
-			public Integer doInTransaction(TransactionStatus status) {
-				jdbcTemplate.update(DELETE_BY_COMPANY_ID, id);
-				int queryResult = jdbcTemplate.update(DELETE_BY_ID, id);
-				if (queryResult < 1) {
-					status.setRollbackOnly();
-				}
-				return queryResult;
-			}});
-		return (queryResult == 1);
+	public boolean deleteById(long id) throws DatabaseException {
+		try {
+			int queryResult = transactionTemplate.execute(new TransactionCallback<Integer>() {
+				@Override
+				public Integer doInTransaction(TransactionStatus status) {
+					jdbcTemplate.update(DELETE_BY_COMPANY_ID, id);
+					int queryResult = jdbcTemplate.update(DELETE_BY_ID, id);
+					if (queryResult < 1) {
+						status.setRollbackOnly();
+					}
+					return queryResult;
+				}});
+			return (queryResult == 1);
+		} catch (DataAccessException e) {
+			throw new DatabaseException(e.getMessage());
+		}
 	}
 	
 }

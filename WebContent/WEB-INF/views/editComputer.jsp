@@ -1,5 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jstl/fmt" prefix="fmt"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 
 <!DOCTYPE html>
 <html>
@@ -25,9 +25,11 @@
                         id: ${id}
                     </div>
                     <h1><fmt:message key="label.editComputer" /></h1>
-                    <div class="alert alert-danger" role="alert" style="display:none;">
-  						The computer name must be completed.
-					</div>
+                    <c:if test="${displayAlert}">
+					    <div class="alert alert-danger" role="alert">
+  							<b><fmt:message key="${alertKey}" /></b>
+						</div>
+					</c:if>
                     <form action="editComputer" method="POST">
                         <input type="hidden" name="id" value="${id}" id="id"/>
                         <fieldset>
@@ -48,7 +50,6 @@
                                 <select class="form-control" id="companyId" name="companyId" >
                                 	<option disabled selected value> -- <fmt:message key="label.companySelect" /> -- </option>
 
-                                    
                                     <c:forEach items="${companies}" var="company">
 										<c:choose>
 											<c:when test="${companyId == company.id}">

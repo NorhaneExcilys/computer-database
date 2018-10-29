@@ -7,10 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.excilys.exception.DatabaseException;
-import com.excilys.exception.UnknowCompanyException;
 import com.excilys.model.Company;
 import com.excilys.persistance.CompanyDAO;
-import com.excilys.persistance.ComputerDAO;
 
 @Service
 public class CompanyService {
@@ -22,11 +20,11 @@ public class CompanyService {
 		return companyDAO.getAll();
 	}
 	
-	public Optional<Company> getCompanyById(long id) throws DatabaseException, UnknowCompanyException {
+	public Optional<Company> getCompanyById(long id) throws DatabaseException {
 		return companyDAO.getById(id);
 	}
 	
-	public boolean deleteCompanyById(long id) throws DatabaseException, UnknowCompanyException {
+	public boolean deleteCompanyById(long id) throws DatabaseException {
 		return companyDAO.deleteById(id);
 	}
 
