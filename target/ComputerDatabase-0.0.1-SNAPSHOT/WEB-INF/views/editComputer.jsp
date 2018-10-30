@@ -1,19 +1,20 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 
 <!DOCTYPE html>
 <html>
 <head>
-<title>Computer Database</title>
+<title><fmt:message key="label.computerDatabase" /></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- Bootstrap -->
-<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
-<link href="css/font-awesome.css" rel="stylesheet" media="screen">
-<link href="css/main.css" rel="stylesheet" media="screen">
+<link href="resources/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="resources/css/font-awesome.css" rel="stylesheet" media="screen">
+<link href="resources/css/main.css" rel="stylesheet" media="screen">
 </head>
 <body>
     <header class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="Dashboard"> Application - Computer Database </a>
+            <a class="navbar-brand" href="dashboard"><fmt:message key="label.title" /></a>
         </div>
     </header>
     <section id="main">
@@ -23,29 +24,32 @@
                     <div class="label label-default pull-right">
                         id: ${id}
                     </div>
-                    <h1>Edit Computer</h1>
-
-                    <form action="EditComputer" method="POST">
-                        <input type="hidden" value="0" id="id"/> <!-- TODO: Change this value with the computer id -->
+                    <h1><fmt:message key="label.editComputer" /></h1>
+                    <c:if test="${displayAlert}">
+					    <div class="alert alert-danger" role="alert">
+  							<b><fmt:message key="${alertKey}" /></b>
+						</div>
+					</c:if>
+                    <form action="editComputer" method="POST">
+                        <input type="hidden" name="id" value="${id}" id="id"/>
                         <fieldset>
                             <div class="form-group">
-                                <label for="computerName">Computer name</label>
-                                <input type="text" class="form-control" id="computerName" name="name" placeholder="Computer name" value="${name}">
+                                <label for="computerName"><fmt:message key="label.computerName" /></label>
+                                <input type="text" class="form-control" id="computerName" name="name" placeholder="<fmt:message key="label.computerName" />" value="${name}">
                             </div>
                             <div class="form-group">
-                                <label for="introduced">Introduced date</label>
-                                <input type="date" class="form-control" id="introduced" name="introduced" placeholder="Introduced date" value="${introduced}">
+                                <label for="introduced"><fmt:message key="label.introducedDate" /></label>
+                                <input type="date" class="form-control" id="introduced" name="introduced" placeholder="<fmt:message key="label.introducedDate" />" value="${introduced}">
                             </div>
                             <div class="form-group">
-                                <label for="discontinued">Discontinued date</label>
-                                <input type="date" class="form-control" id="discontinued" name="discontinued" placeholder="Discontinued date" value="${discontinued}">
+                                <label for="discontinued"><fmt:message key="label.discontinuedDate" /></label>
+                                <input type="date" class="form-control" id="discontinued" name="discontinued" placeholder="<fmt:message key="label.discontinuedDate" />" value="${discontinued}">
                             </div>
                             <div class="form-group">
-                                <label for="companyId">Company</label>
+                                <label for="companyId"><fmt:message key="label.company" /></label>
                                 <select class="form-control" id="companyId" name="companyId" >
-                                	<option disabled selected value> -- select a company -- </option>
+                                	<option disabled selected value> -- <fmt:message key="label.companySelect" /> -- </option>
 
-                                    
                                     <c:forEach items="${companies}" var="company">
 										<c:choose>
 											<c:when test="${companyId == company.id}">
@@ -60,9 +64,9 @@
                             </div>            
                         </fieldset>
                         <div class="actions pull-right">
-                            <input type="submit" value="Edit" class="btn btn-primary">
-                            or
-                            <a href="Dashboard" class="btn btn-default">Cancel</a>
+                            <input type="submit" value="<fmt:message key="label.edit" />" class="btn btn-primary">
+                            <fmt:message key="label.or" />
+                            <a href="dashboard" class="btn btn-default"><fmt:message key="label.cancel" /></a>
                         </div>
                     </form>
                 </div>
