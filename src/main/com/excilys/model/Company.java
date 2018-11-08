@@ -1,5 +1,12 @@
 package com.excilys.model;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 /**
  * <b>Company is the class that represent a company.</b>
  * A company is characterized by the following informations:
@@ -11,10 +18,20 @@ package com.excilys.model;
  *
  */
 
+@Entity(name="company")
 public class Company {
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id")
 	private long id;
+	
+	@Column(name = "name")
 	private String name;
+	
+	public Company() {
+		
+	}
 	
 	/** builds Company defined by its id and name
 	 * @param id the id of the company

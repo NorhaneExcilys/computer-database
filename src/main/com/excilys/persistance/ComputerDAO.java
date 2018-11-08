@@ -1,21 +1,25 @@
 package com.excilys.persistance;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import javax.sql.DataSource;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.excilys.exception.UnknowComputerException;
 import com.excilys.model.Computer;
 import com.excilys.model.Paging;
-
+import com.excilys.model.QComputer;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.excilys.exception.DatabaseException;
 import com.excilys.exception.UnknowCompanyException;
 import com.excilys.model.Company;
@@ -32,6 +36,7 @@ import com.excilys.model.Company;
  *
  */
 @Repository
+@Transactional
 public class ComputerDAO {
 	
 	private final static String GET_COUNT = "SELECT COUNT(id) AS count FROM computer";
@@ -48,9 +53,19 @@ public class ComputerDAO {
 	
     private JdbcTemplate jdbcTemplate;
     
+    private SessionFactory sessionFactory;
+    
     @Autowired
-    public ComputerDAO(DataSource dataSource) {
+    private HibernateTransactionManager tx;
+    
+	private QComputer qComputer;
+
+
+    @Autowired
+    public ComputerDAO(DataSource dataSource, SessionFactory sessionFactory) {
         jdbcTemplate = new JdbcTemplate(dataSource);
+        this.sessionFactory = sessionFactory;
+    	qComputer = QComputer.computer;	
     }
  
 	/**
@@ -59,12 +74,10 @@ public class ComputerDAO {
 	 * @throws DatabaseException
 	 */
 	public int getCount() throws DatabaseException {
-		try {
-			return jdbcTemplate.queryForObject(GET_COUNT, Integer.class);
-		}
-		catch (DataAccessException e) {
-			throw new DatabaseException(e.getMessage());
-		}
+		Session session = sessionFactory.getCurrentSession();
+		JPAQueryFactory query = new JPAQueryFactory(session);
+		QComputer computer = QComputer.computer;
+		return (int) query.selectFrom(computer).fetchCount();
 	}
 	
 	/**
@@ -89,16 +102,10 @@ public class ComputerDAO {
 	 * @throws DatabaseException
 	 * @throws UnknowCompanyException
 	 */
-	public List<Computer> getByPage(Paging paging) throws DatabaseException {
-		Object[] sqlParameter = {
-				paging.getComputersPerPage(),
-				paging.getComputersPerPage() * (paging.getCurrentPage()-1)
-		};
-		try {
-			return jdbcTemplate.query(GET_BY_PAGE, sqlParameter, computerRowMapper);
-		} catch (DataAccessException e) {
-			throw new DatabaseException(e.getMessage());
-		}
+	public List<Computer> getByPage(Paging paging) throws DatabaseException {		
+		Session session = sessionFactory.getCurrentSession();
+		JPAQueryFactory query = new JPAQueryFactory(session);
+		return query.selectFrom(qComputer).limit(paging.getComputersPerPage()).offset(paging.getComputersPerPage() * (paging.getCurrentPage()-1)).fetch();
 	}
 
 	/**
@@ -108,18 +115,9 @@ public class ComputerDAO {
 	 * @throws DatabaseException
 	 */
 	public Optional<Computer> getById(long id) throws DatabaseException {
-		List<Computer> computers = new ArrayList<Computer>();
-		try {
-			computers = jdbcTemplate.query(GET_BY_ID, computerRowMapper, id);
-		} catch (DataAccessException e) {
-			throw new DatabaseException(e.getMessage());
-		}
-		
-		if (computers.size() == 0) {
-			return Optional.empty();
-		}
-		
-		return Optional.of(computers.get(0));
+		Session session = sessionFactory.getCurrentSession();
+		JPAQueryFactory query = new JPAQueryFactory(session);
+		return Optional.of(query.selectFrom(qComputer).where(qComputer.id.eq(id)).fetchOne());
 	}
 	
 	/**
@@ -127,7 +125,6 @@ public class ComputerDAO {
 	 * @param word the filter of name
 	 * @return the list of computer filter by name
 	 * @throws DatabaseException
-	 * @throws UnknowCompanyException
 	 */
 	public List<Computer> getBySearchedWord(String word, Paging paging) throws DatabaseException {
 		Object[] sqlParameter = {
@@ -178,15 +175,14 @@ public class ComputerDAO {
 	 * @throws UnknowComputerException 
 	 */
 	public boolean deleteComputerByList(String idList) throws DatabaseException, UnknowComputerException {
-		try {
-			int queryResult = jdbcTemplate.update(String.format(DELETE_BY_LIST, idList));
-			if (queryResult < 1) {
-				throw new UnknowComputerException();
-			}
-			return (queryResult == idList.split(",").length);
-		} catch (DataAccessException e) {
-			throw new DatabaseException(e.getMessage());
-		}
+		Session session = sessionFactory.getCurrentSession();
+		JPAQueryFactory query = new JPAQueryFactory(session);
+		query
+		    .delete(qComputer)
+		    .where(qComputer.id.eq(1L))
+			.execute();
+		
+		return true;
 	}
 
 	/**
@@ -195,30 +191,18 @@ public class ComputerDAO {
 	 * @return true if the computer is updated and false if not
 	 * @throws DatabaseException 
 	 */
-	public boolean updateComputerById(Computer computer) throws DatabaseException, UnknowComputerException {
-		long id = computer.getId();
-		String name = computer.getName();
-		Optional<LocalDate> introducedDate = computer.getIntroducedDate();
-		Optional<LocalDate> discontinuedDate = computer.getDiscontinuedDate();
-		Optional<Company> company = computer.getCompany();
-		
-		Object[] sqlParameter = {
-				name,
-				introducedDate.isPresent() ? java.sql.Date.valueOf(introducedDate.get()) : null,
-				discontinuedDate.isPresent() ? java.sql.Date.valueOf(discontinuedDate.get()) : null,
-				company.isPresent() ? company.get().getId() : null,
-				id
-		};
-		
-		try {
-			int queryResult = jdbcTemplate.update(UPDATE, sqlParameter);
-			if (queryResult < 1) {
-				throw new UnknowComputerException();
-			}
-			return (queryResult == 1);
-		} catch (DataAccessException e) {
-			throw new DatabaseException(e.getMessage());
-		}
+	public boolean updateComputerById(Computer computer) throws DatabaseException {
+		Session session = sessionFactory.getCurrentSession();
+		JPAQueryFactory query = new JPAQueryFactory(session);
+		return query
+		    .update(qComputer)
+			.where(qComputer.id.eq(computer.getId()))
+			.set(qComputer.name, computer.getName())
+			.set(qComputer.introducedDate, computer.getIntroducedDate().isPresent() ? computer.getIntroducedDate().get() : null)
+			.set(qComputer.discontinuedDate, computer.getDiscontinuedDate().isPresent() ? computer.getDiscontinuedDate().get() : null)
+			.set(qComputer.company, computer.getCompany().isPresent() ? computer.getCompany().get() : null)
+			.execute() == 1;
 	}
+	
 	
 }

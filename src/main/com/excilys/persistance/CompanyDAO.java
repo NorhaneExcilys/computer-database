@@ -6,20 +6,19 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.excilys.exception.DatabaseException;
-import com.excilys.exception.UnknowCompanyException;
 import com.excilys.model.Company;
+import com.excilys.model.QCompany;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 
 /**
  * <b>CompanyDAO is the class that enables to performs action on the database computer.</b>
@@ -32,8 +31,9 @@ import com.excilys.model.Company;
  *
  */
 @Repository
+@Transactional
 public class CompanyDAO {
-
+	
 	private final static String GET_ALL = "SELECT id, name FROM company;";
 	private final static String GET_BY_ID = "SELECT id, name FROM company WHERE id = ?;";
 	private final static String DELETE_BY_ID = "DELETE FROM company WHERE id = ?;";
@@ -42,17 +42,20 @@ public class CompanyDAO {
 	@Autowired
 	private CompanyRowMapper companyRowMapper;
 	
+	private SessionFactory sessionFactory;
+	
     private JdbcTemplate jdbcTemplate;
     
-    private TransactionTemplate transactionTemplate;
-    
-    private Logger logger = LoggerFactory.getLogger("AddComputer");
+    private QCompany qCompany;
     
     @Autowired
-    public CompanyDAO(DataSource dataSource, PlatformTransactionManager transactionManager) {
-    	transactionTemplate = new TransactionTemplate(transactionManager);
-        jdbcTemplate = new JdbcTemplate(dataSource);
-        logger.debug(transactionTemplate.toString());
+    private HibernateTransactionManager tx;
+
+    @Autowired
+    public CompanyDAO(DataSource dataSource, SessionFactory sessionFactory) {
+    	jdbcTemplate = new JdbcTemplate(dataSource);
+        this.sessionFactory = sessionFactory;
+        qCompany = QCompany.company;
     }
     
 	/**
@@ -61,11 +64,9 @@ public class CompanyDAO {
 	 * @throws DatabaseException 
 	 */
 	public List<Company> getAll() throws DatabaseException {
-		try {
-			return jdbcTemplate.query(GET_ALL, companyRowMapper);
-		} catch (DataAccessException e) {
-			throw new DatabaseException(e.getMessage());
-		}
+		Session session = sessionFactory.getCurrentSession();
+		JPAQueryFactory query = new JPAQueryFactory(session);
+		return query.selectFrom(qCompany).fetch();
 	}
 	
 	/**
@@ -96,8 +97,8 @@ public class CompanyDAO {
 	 * @throws DatabaseException
 	 */
 	public boolean deleteById(long id) throws DatabaseException {
-		try {
-			int queryResult = transactionTemplate.execute(new TransactionCallback<Integer>() {
+		/*try {
+			int queryResult = tx.execute(new TransactionCallback<Integer>() {
 				@Override
 				public Integer doInTransaction(TransactionStatus status) {
 					jdbcTemplate.update(DELETE_BY_COMPANY_ID, id);
@@ -110,7 +111,8 @@ public class CompanyDAO {
 			return (queryResult == 1);
 		} catch (DataAccessException e) {
 			throw new DatabaseException(e.getMessage());
-		}
+		}*/
+		return true;
 	}
 	
 }

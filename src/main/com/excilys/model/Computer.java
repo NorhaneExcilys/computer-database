@@ -3,6 +3,15 @@ package com.excilys.model;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
 /**
  * <b>Computer is the class that represent a computer.</b>
  * A computer is characterized by the following informations:
@@ -17,13 +26,30 @@ import java.util.Optional;
  *
  */
 
+@Entity(name="computer")
 public class Computer {
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id")
 	private long id;
+	
+	@Column(name = "name")
 	private String name;
-	private Optional<LocalDate> introducedDate;
-	private Optional<LocalDate> discontinuedDate;
-	private Optional<Company> company;
+	
+	@Column(name = "introduced")
+	private LocalDate introducedDate;
+	
+	@Column(name = "discontinued")
+	private LocalDate discontinuedDate;
+	
+	@ManyToOne
+	@JoinColumn(name = "company_id")
+	private Company company;
+	
+	public Computer() {
+		
+	}
 	
 	/**
 	 * builds Computer defined by a computerBuilder
@@ -32,9 +58,9 @@ public class Computer {
 	private Computer(ComputerBuilder computerBuilder) {
 		this.id = computerBuilder.id;
 		this.name = computerBuilder.name;
-		this.introducedDate = computerBuilder.introducedDate;
-		this.discontinuedDate = computerBuilder.discontinuedDate;
-		this.company = computerBuilder.company;
+		this.introducedDate = computerBuilder.introducedDate.isPresent() ? computerBuilder.introducedDate.get() : null;
+		this.discontinuedDate = computerBuilder.discontinuedDate.isPresent() ? computerBuilder.discontinuedDate.get() : null;
+		this.company = computerBuilder.company.isPresent() ? computerBuilder.company.get() : null;
 	}
 	
 	public long getId() {
@@ -46,15 +72,15 @@ public class Computer {
 	}
 	
 	public Optional<LocalDate> getIntroducedDate() {
-		return introducedDate;
+		return Optional.ofNullable(introducedDate);
 	}
 	
 	public Optional<LocalDate> getDiscontinuedDate() {
-		return discontinuedDate;
+		return Optional.ofNullable(discontinuedDate);
 	}
 	
 	public Optional<Company> getCompany() {
-		return company;
+		return Optional.ofNullable(company);
 	}
 	
     @Override
