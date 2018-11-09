@@ -45,8 +45,8 @@ public class ComputerController {
 	private CompanyService companyService;
 	
 	private Paging currentPaging;
-	private int totalPage;
-	private int totalComputers;
+	private long totalPage;
+	private long totalComputers;
 	private Optional<String> searchedWord;
 
 	
@@ -83,7 +83,7 @@ public class ComputerController {
 		searchedWord = Optional.ofNullable(search);
 		
 		try {
-			totalComputers = computerService.getCount(searchedWord);
+			totalComputers = computerService.getCount(searchedWord, currentPaging);
 			totalPage = totalComputers / currentPaging.getComputersPerPage();
 			if (totalComputers % currentPaging.getComputersPerPage() != 0) {
 				totalPage++;

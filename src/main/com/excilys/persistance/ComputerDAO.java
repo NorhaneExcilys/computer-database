@@ -1,28 +1,24 @@
 package com.excilys.persistance;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import javax.sql.DataSource;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.excilys.exception.UnknowComputerException;
 import com.excilys.model.Computer;
 import com.excilys.model.Paging;
 import com.excilys.model.QComputer;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.excilys.exception.DatabaseException;
 import com.excilys.exception.UnknowCompanyException;
-import com.excilys.model.Company;
 
 /**
  * <b>DAOComputer is the class that enables to performs action on the database computer.</b>
@@ -38,34 +34,18 @@ import com.excilys.model.Company;
 @Repository
 @Transactional
 public class ComputerDAO {
-	
-	private final static String GET_COUNT = "SELECT COUNT(id) AS count FROM computer";
-	private final static String GET_COUNT_BY_SEARCHED_WORD = "SELECT COUNT(id) AS count FROM computer WHERE name LIKE ?;";	
-	private final static String GET_BY_PAGE = "SELECT id, name, introduced, discontinued, company_id FROM computer LIMIT ? OFFSET ?;";
-	private final static String GET_BY_ID = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE id = ?;";
-	private final static String GET_BY_SEARCHED_WORD = "SELECT id, name, introduced, discontinued, company_id FROM computer WHERE name LIKE ? LIMIT ? OFFSET ?;";
-	private final static String ADD = "INSERT INTO computer (name, introduced, discontinued, company_id) VALUE (?, ?, ?, ?);";
-	private final static String UPDATE = "UPDATE computer SET name = ?, introduced = ?, discontinued = ?, company_id = ? WHERE id = ?;";
-	private final static String DELETE_BY_LIST = "DELETE FROM computer WHERE id IN (%s)";
 
-	@Autowired
-	private ComputerRowMapper computerRowMapper;
-	
-    private JdbcTemplate jdbcTemplate;
-    
-    private SessionFactory sessionFactory;
-    
+	private EntityManager entityManager;
+
     @Autowired
-    private HibernateTransactionManager tx;
+    private PlatformTransactionManager tx;
     
 	private QComputer qComputer;
 
-
     @Autowired
-    public ComputerDAO(DataSource dataSource, SessionFactory sessionFactory) {
-        jdbcTemplate = new JdbcTemplate(dataSource);
-        this.sessionFactory = sessionFactory;
+    public ComputerDAO(EntityManagerFactory entityManagerFactory) {
     	qComputer = QComputer.computer;	
+    	this.entityManager = entityManagerFactory.createEntityManager();
     }
  
 	/**
@@ -73,11 +53,9 @@ public class ComputerDAO {
 	 * @return the number of computer in the database computer
 	 * @throws DatabaseException
 	 */
-	public int getCount() throws DatabaseException {
-		Session session = sessionFactory.getCurrentSession();
-		JPAQueryFactory query = new JPAQueryFactory(session);
-		QComputer computer = QComputer.computer;
-		return (int) query.selectFrom(computer).fetchCount();
+	public long getCount() throws DatabaseException {
+		JPAQueryFactory query = new JPAQueryFactory(entityManager);
+		return query.selectFrom(qComputer).fetchCount();
 	}
 	
 	/**
@@ -86,13 +64,14 @@ public class ComputerDAO {
 	 * @return the number of computer in the database computer filter by name
 	 * @throws DatabaseException
 	 */
-	public int getCountBySearchedWord(String word) throws DatabaseException {
-		try {
-			return jdbcTemplate.queryForObject(GET_COUNT_BY_SEARCHED_WORD, Integer.class, "%" + word + "%");
-		}
-		catch (DataAccessException e) {
-			throw new DatabaseException(e.getMessage());
-		}
+	public long getCountBySearchedWord(String word, Paging paging) throws DatabaseException {
+		JPAQueryFactory query = new JPAQueryFactory(entityManager);
+		return query
+				.selectFrom(qComputer)
+				.where(qComputer.name.like("%" + word + "%").or(qComputer.company.name.like("%" + word + "%")))
+				.limit(paging.getComputersPerPage())
+				.offset(paging.getComputersPerPage() * (paging.getCurrentPage()-1))
+				.fetchCount();
 	}
 	
 	/**
@@ -103,9 +82,12 @@ public class ComputerDAO {
 	 * @throws UnknowCompanyException
 	 */
 	public List<Computer> getByPage(Paging paging) throws DatabaseException {		
-		Session session = sessionFactory.getCurrentSession();
-		JPAQueryFactory query = new JPAQueryFactory(session);
-		return query.selectFrom(qComputer).limit(paging.getComputersPerPage()).offset(paging.getComputersPerPage() * (paging.getCurrentPage()-1)).fetch();
+		JPAQueryFactory query = new JPAQueryFactory(entityManager);
+		return query
+				.selectFrom(qComputer)
+				.limit(paging.getComputersPerPage())
+				.offset(paging.getComputersPerPage() * (paging.getCurrentPage()-1))
+				.fetch();
 	}
 
 	/**
@@ -115,9 +97,11 @@ public class ComputerDAO {
 	 * @throws DatabaseException
 	 */
 	public Optional<Computer> getById(long id) throws DatabaseException {
-		Session session = sessionFactory.getCurrentSession();
-		JPAQueryFactory query = new JPAQueryFactory(session);
-		return Optional.of(query.selectFrom(qComputer).where(qComputer.id.eq(id)).fetchOne());
+		JPAQueryFactory query = new JPAQueryFactory(entityManager);
+		return Optional.of(query
+				.selectFrom(qComputer)
+				.where(qComputer.id.eq(id))
+				.fetchOne());
 	}
 	
 	/**
@@ -127,17 +111,13 @@ public class ComputerDAO {
 	 * @throws DatabaseException
 	 */
 	public List<Computer> getBySearchedWord(String word, Paging paging) throws DatabaseException {
-		Object[] sqlParameter = {
-				"%" + word + "%",
-				paging.getComputersPerPage(),
-				paging.getComputersPerPage() * (paging.getCurrentPage()-1)
-		};
-		
-		try {	
-			return jdbcTemplate.query(GET_BY_SEARCHED_WORD, sqlParameter, computerRowMapper);
-		} catch (DataAccessException e) {
-			throw new DatabaseException(e.getMessage());
-		}
+		JPAQueryFactory query = new JPAQueryFactory(entityManager);
+		return query
+				.selectFrom(qComputer)
+				.where(qComputer.name.like("%" + word + "%").or(qComputer.company.name.like("%" + word + "%")))
+				.limit(paging.getComputersPerPage())
+				.offset(paging.getComputersPerPage() * (paging.getCurrentPage()-1))
+				.fetch();	
 	}
 	
 	/**
@@ -147,24 +127,11 @@ public class ComputerDAO {
 	 * @throws DatabaseException 
 	 */
 	public boolean addComputer(Computer computer) throws DatabaseException {
-		String name = computer.getName();
-		Optional<LocalDate> introducedDate = computer.getIntroducedDate();
-		Optional<LocalDate> discontinuedDate = computer.getDiscontinuedDate();
-		Optional<Company> company = computer.getCompany();
+		entityManager.getTransaction().begin();
+		entityManager.persist(computer);
+		entityManager.getTransaction().commit();
 		
-		Object[] sqlParameter = {
-				name,
-				introducedDate.isPresent() ? java.sql.Date.valueOf(introducedDate.get()) : null,
-				discontinuedDate.isPresent() ? java.sql.Date.valueOf(discontinuedDate.get()) : null,
-				company.isPresent() ? company.get().getId() : null
-		};
-		
-		try {	
-			int queryResult = jdbcTemplate.update(ADD, sqlParameter);
-			return (queryResult == 1);
-		} catch (DataAccessException e) {
-			throw new DatabaseException(e.getMessage());
-		}
+		return true;
 	}
 	
 	/**
@@ -174,15 +141,20 @@ public class ComputerDAO {
 	 * @throws DatabaseException 
 	 * @throws UnknowComputerException 
 	 */
-	public boolean deleteComputerByList(String idList) throws DatabaseException, UnknowComputerException {
-		Session session = sessionFactory.getCurrentSession();
-		JPAQueryFactory query = new JPAQueryFactory(session);
-		query
+	public boolean deleteComputerByList(String strIdList) throws DatabaseException, UnknowComputerException {
+		JPAQueryFactory query = new JPAQueryFactory(entityManager);
+		String[] idList = strIdList.split(",");
+		BooleanBuilder predicate = new BooleanBuilder();
+	    for (String strId : idList){
+	    	predicate.or(qComputer.id.eq(Long.valueOf(strId)));
+	    }
+	    entityManager.getTransaction().begin();
+		boolean queryResult = query
 		    .delete(qComputer)
-		    .where(qComputer.id.eq(1L))
-			.execute();
-		
-		return true;
+		    .where(predicate)
+			.execute() == idList.length;
+		entityManager.getTransaction().commit();
+		return queryResult;
 	}
 
 	/**
@@ -192,9 +164,9 @@ public class ComputerDAO {
 	 * @throws DatabaseException 
 	 */
 	public boolean updateComputerById(Computer computer) throws DatabaseException {
-		Session session = sessionFactory.getCurrentSession();
-		JPAQueryFactory query = new JPAQueryFactory(session);
-		return query
+		JPAQueryFactory query = new JPAQueryFactory(entityManager);
+		entityManager.getTransaction().begin();
+		boolean queryResult = query
 		    .update(qComputer)
 			.where(qComputer.id.eq(computer.getId()))
 			.set(qComputer.name, computer.getName())
@@ -202,6 +174,8 @@ public class ComputerDAO {
 			.set(qComputer.discontinuedDate, computer.getDiscontinuedDate().isPresent() ? computer.getDiscontinuedDate().get() : null)
 			.set(qComputer.company, computer.getCompany().isPresent() ? computer.getCompany().get() : null)
 			.execute() == 1;
+		entityManager.getTransaction().commit();
+		return queryResult;
 	}
 	
 	

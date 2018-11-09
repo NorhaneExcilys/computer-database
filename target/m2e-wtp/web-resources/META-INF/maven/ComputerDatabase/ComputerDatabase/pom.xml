@@ -56,14 +56,15 @@
     <javax.servlet-api.version>3.0.1</javax.servlet-api.version>
     <HikariCP.version>3.2.0</HikariCP.version>
     <jstl.version>1.2</jstl.version>
-    <spring-webmvc.version>5.0.8.RELEASE</spring-webmvc.version>
-    <spring-jdbc.version>5.0.8.RELEASE</spring-jdbc.version>
     <querydsl-apt.version>4.2.1</querydsl-apt.version>
     <querydsl-jpa.version>4.2.1</querydsl-jpa.version>
     <hibernate-core.version>5.3.7.Final</hibernate-core.version>
     <hibernate-entitymanager.version>5.2.10.Final</hibernate-entitymanager.version>
+    <spring-webmvc.version>5.0.8.RELEASE</spring-webmvc.version>
+    <spring-jdbc.version>5.0.8.RELEASE</spring-jdbc.version>
     <spring-orm.version>5.1.2.RELEASE</spring-orm.version>
     <jaxb-api.version>2.3.0</jaxb-api.version>
+    <spring-tx.version>5.1.1.RELEASE</spring-tx.version>
 
   </properties>
         
@@ -181,6 +182,13 @@
 	    <artifactId>jaxb-api</artifactId>
 	    <version>${jaxb-api.version}</version>
 	</dependency>
+	
+	<dependency>
+	    <groupId>org.springframework</groupId>
+	    <artifactId>spring-tx</artifactId>
+	    <version>${spring-tx.version}</version>
+	</dependency>
+	
  
   </dependencies>
 </project>

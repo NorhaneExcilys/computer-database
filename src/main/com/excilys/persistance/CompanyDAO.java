@@ -1,18 +1,17 @@
 package com.excilys.persistance;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.sql.DataSource;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.excilys.exception.DatabaseException;
@@ -34,28 +33,17 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 @Transactional
 public class CompanyDAO {
 	
-	private final static String GET_ALL = "SELECT id, name FROM company;";
-	private final static String GET_BY_ID = "SELECT id, name FROM company WHERE id = ?;";
-	private final static String DELETE_BY_ID = "DELETE FROM company WHERE id = ?;";
-	private final static String DELETE_BY_COMPANY_ID = "DELETE FROM computer WHERE company_id = ?";
+	private EntityManager entityManager;
 	
-	@Autowired
-	private CompanyRowMapper companyRowMapper;
-	
-	private SessionFactory sessionFactory;
-	
-    private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private PlatformTransactionManager tx;
     
     private QCompany qCompany;
-    
-    @Autowired
-    private HibernateTransactionManager tx;
 
     @Autowired
-    public CompanyDAO(DataSource dataSource, SessionFactory sessionFactory) {
-    	jdbcTemplate = new JdbcTemplate(dataSource);
-        this.sessionFactory = sessionFactory;
+    public CompanyDAO(EntityManagerFactory entityManagerFactory) {
         qCompany = QCompany.company;
+        entityManager = entityManagerFactory.createEntityManager();
     }
     
 	/**
@@ -64,8 +52,7 @@ public class CompanyDAO {
 	 * @throws DatabaseException 
 	 */
 	public List<Company> getAll() throws DatabaseException {
-		Session session = sessionFactory.getCurrentSession();
-		JPAQueryFactory query = new JPAQueryFactory(session);
+		JPAQueryFactory query = new JPAQueryFactory(entityManager);
 		return query.selectFrom(qCompany).fetch();
 	}
 	
@@ -76,18 +63,8 @@ public class CompanyDAO {
 	 * @throws DatabaseException 
 	 */
 	public Optional<Company> getById(long id) throws DatabaseException {
-		List<Company> companies = new ArrayList<Company>();
-		try {
-			companies = jdbcTemplate.query(GET_BY_ID, companyRowMapper, id);
-		} catch (DataAccessException e) {
-			throw new DatabaseException(e.getMessage());
-		}
-		
-		if (companies.size() == 0) {
-			return Optional.empty();
-		}
-		
-		return Optional.of(companies.get(0));
+		JPAQueryFactory query = new JPAQueryFactory(entityManager);
+		return Optional.of(query.selectFrom(qCompany).where(qCompany.id.eq(id)).fetchOne());
 	}
 	
 	/**
@@ -97,22 +74,14 @@ public class CompanyDAO {
 	 * @throws DatabaseException
 	 */
 	public boolean deleteById(long id) throws DatabaseException {
-		/*try {
-			int queryResult = tx.execute(new TransactionCallback<Integer>() {
-				@Override
-				public Integer doInTransaction(TransactionStatus status) {
-					jdbcTemplate.update(DELETE_BY_COMPANY_ID, id);
-					int queryResult = jdbcTemplate.update(DELETE_BY_ID, id);
-					if (queryResult < 1) {
-						status.setRollbackOnly();
-					}
-					return queryResult;
-				}});
-			return (queryResult == 1);
-		} catch (DataAccessException e) {
-			throw new DatabaseException(e.getMessage());
-		}*/
-		return true;
+		JPAQueryFactory query = new JPAQueryFactory(entityManager);
+		entityManager.getTransaction().begin();
+		boolean queryResult = query
+		    .delete(qCompany)
+		    .where(qCompany.id.eq(id))
+			.execute() == 1;
+		entityManager.getTransaction().commit();
+		return queryResult;
 	}
 	
 }

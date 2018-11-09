@@ -20,8 +20,8 @@ public class ComputerService {
 	@Autowired
 	private ComputerDAO computerDAO;
 	
-	public int getCount(Optional<String> word) throws DatabaseException {
-		return word.isPresent() ? computerDAO.getCountBySearchedWord(word.get()) : computerDAO.getCount();
+	public long getCount(Optional<String> word, Paging paging) throws DatabaseException {
+		return word.isPresent() ? computerDAO.getCountBySearchedWord(word.get(), paging) : computerDAO.getCount();
 	}
 	
 	public List<Computer> getByPage(Paging paging) throws DatabaseException, UnknowCompanyException {

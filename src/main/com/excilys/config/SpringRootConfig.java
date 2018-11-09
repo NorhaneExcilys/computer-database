@@ -2,6 +2,7 @@ package com.excilys.config;
 
 import java.util.Properties;
 
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.hibernate.SessionFactory;
@@ -11,38 +12,46 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.JpaVendorAdapter;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
-@EnableTransactionManagement
+@EnableTransactionManagement(proxyTargetClass=true)
 @ComponentScan("com.excilys.persistance," + " com.excilys.service")
 public class SpringRootConfig {
 	
-	@Bean
-    public LocalSessionFactoryBean getSessionFactory() {
-       LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-       sessionFactory.setDataSource(getDataSource());
-       sessionFactory.setPackagesToScan(new String[] { "com.excilys.model" });
-       sessionFactory.setHibernateProperties(getProperties());  
-       return sessionFactory;
-    }
+   @Bean
+   public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+      LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+      em.setDataSource(getDataSource());
+      em.setPackagesToScan(new String[] { "com.excilys.model" });
+ 
+      JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+      em.setJpaVendorAdapter(vendorAdapter);
+      em.setJpaProperties(getProperties());
+ 
+      return em;
+   }
+   
+   @Bean
+   public PlatformTransactionManager transactionManager(EntityManagerFactory emf){
+      JpaTransactionManager transactionManager = new JpaTransactionManager();
+      transactionManager.setEntityManagerFactory(emf);
+      return transactionManager;
+   }
 
 	@Bean
     public DataSource getDataSource() {
 		HikariConfig hikariConfig = new HikariConfig("/home/elgharbi/eclipse-workspace/ComputerDatabase/datasource.properties");
 		HikariDataSource hikariDataSource = new HikariDataSource(hikariConfig);
         return hikariDataSource;
-    }
-    
-    @Bean
-    @Autowired
-    public HibernateTransactionManager transactionManager(SessionFactory sessionFactory) {
-       HibernateTransactionManager txManager = new HibernateTransactionManager();
-       txManager.setSessionFactory(sessionFactory);
-       return txManager;
     }
     
     Properties getProperties() {
